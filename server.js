@@ -1,5 +1,9 @@
 const fs = require("fs");
+const cmd = require('node-cmd');
+const crypto = require('crypto'); 
+const bodyParser = require('body-parser');
 const deepcopy = require("deepcopy");
+
 const Game = require("./game/game.js");
 const powers = require("./game/player.js");
 var globals = require("./game/globals.js");
@@ -10,10 +14,35 @@ var http = require('http').createServer(app);
 var io = require('socket.io')(http);
 
 app.use(express.static("public"));
+app.use(bodyParser.json());
 
 app.get('/', (req, res) => {
 	res.sendFile(__dirname + '/views/index.html');
 });
+
+const onWebhook = (req, res) => {
+  let hmac = crypto.createHmac('sha1', process.env.SECRET);
+  let sig  = `sha1=${hmac.update(JSON.stringify(req.body)).digest('hex')}`;
+
+  if (req.headers['x-github-event'] === 'push' && sig === req.headers['x-hub-signature']) {
+    cmd.run('chmod 777 ./git.sh'); 
+    
+    cmd.get('./git.sh', (err, data) => {  
+      if (data) {
+        console.log(data);
+      }
+      if (err) {
+        console.log(err);
+      }
+    })
+
+    cmd.run('refresh');
+  }
+
+  return res.sendStatus(200);
+}
+
+app.post('/git', onWebhook);
 
 // Health check
 app.head('/health', function (req, res) {
@@ -22,7 +51,7 @@ app.head('/health', function (req, res) {
 
 var string = fs.readFileSync('data/save.json');
 var data = JSON.parse(string);
-console.log(data);
+// console.log(data);
 
 var games = {};
 
@@ -46,7 +75,7 @@ function randomID(length) {
 	// Pick characers randomly
 	let str = '';
 	for (let i = 0; i < length; i++) {
-			str += chars.charAt(Math.floor(Math.random() * chars.length));
+		  str += chars.charAt(Math.floor(Math.random() * chars.length));
 	}
 
 	return str;
