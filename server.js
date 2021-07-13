@@ -313,7 +313,6 @@ io.on('connection', (socket) => {
 		if (game.order[game.turn] === socket.id && game.players[socket.id].prePlay === null) {
 			if (index < 4) {
 				game.players[socket.id].play(index);
-				io.in(game.id).emit("update gamestate", {moveList: game.moveList});
 			} else if (index == 4 && game.players[socket.id].powerActive) {
 				io.in(game.id).emit("message", game.players[socket.id].activePower());
 			}

@@ -241,6 +241,7 @@ class Glitcher extends Player {
 
 		if (this.stealTurn) {
 			this.stealTurn = false;
+			this.game.io.in(this.game.id).emit("update gamestate", {map: this.game.map, layer: this.game.layer, moveList: this.game.moveList});
 		} else {
 			this.game.nextTurn();
 		}
