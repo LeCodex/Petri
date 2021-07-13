@@ -42,14 +42,14 @@ class Player {
 
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
-				this.moveTile(new_map, x, y, x + dx, y + dy);
+				this.moveTile(new_map, x, y, x + dx, y + dy, dx, dy);
 			}
 		}
 
 		this.game.map = new_map;
 	}
 
-	moveTile(map, x, y, nx, ny) {
+	moveTile(map, x, y, nx, ny, dx, dy) {
 		if (this.game.map[y][x] == this.index && this.game.inside(nx, ny)) {
 			var new_tile = this.game.map[ny][nx];
 
@@ -329,7 +329,7 @@ class Topologist extends Player {
 				var nx = (x + dx + this.game.settings.width) % this.game.settings.width;
 				var ny = (y + dy + this.game.settings.height) % this.game.settings.height;
 
-				this.moveTile(new_map, x, y, nx, ny);
+				this.moveTile(new_map, x, y, nx, ny, dx, dy);
 			}
 		}
 
