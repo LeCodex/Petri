@@ -10,9 +10,9 @@ class Player {
 		this.ready = false;
 		this.powerActive = false;
 		this.variables = {};
-		
+
 		this.prePlay = null;
-		
+
 		this.name = "Sans Pouvoir";
 		this.emoji = "🚫";
 		this.description = "Aucun pouvoir spécial";
@@ -26,12 +26,12 @@ class Player {
 		var dx = [-1, 0, 0, 1][index];
 		var dy = [0, -1, 1, 0][index];
 		var symbol = ["L", "U", "D", "R"][index];
-		
+
 		var moveRow = this.game.moveList[this.game.moveList.length - 1];
 		moveRow[moveRow.length - 1] += symbol;
 
 		var new_map = JSON.parse(JSON.stringify(this.game.map));
-		
+
 		this.game.clearLayer();
 
 		for (var [y, row] of this.game.map.entries()) {
@@ -88,16 +88,16 @@ class Player {
 	onDefense(attack, defense, attacker) {
 		return 0;
 	}
-	
+
 	onTurnStart() {}
-	
+
 	onTurnEnd() {}
-	
+
 	activePower() {
 		var moveRow = this.game.moveList[this.game.moveList.length - 1];
 		moveRow[moveRow.length - 1] += "P";
 	}
-	
+
 	forfeit() {
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
@@ -107,15 +107,15 @@ class Player {
 				}
 			}
 		}
-		
+
 		if (this.game.order[this.game.turn] === this.id) {
 			var moveRow = this.game.moveList[this.game.moveList.length - 1];
 			moveRow[moveRow.length - 1] = "X";
-			
+
 			this.game.nextTurn();
 		} else {
 			this.game.io.in(this.game.id).emit("update gamestate", {map: this.game.map, layer: this.game.layer});
-			this.game.checkWin(); 
+			this.game.checkWin();
 		}
 	}
 }
@@ -124,7 +124,7 @@ class Player {
 class Defender extends Player {
 	constructor(game, user, id) {
 		super(game, user, id)
-		
+
 		this.name = "Défenseur";
 		this.emoji = "🛡️";
 		this.description = "A +1 en défense";
@@ -139,7 +139,7 @@ class Defender extends Player {
 class Attacker extends Player {
 	constructor(game, user, id) {
 		super(game, user, id)
-		
+
 		this.name = "Attaquant";
 		this.emoji = "🗡️";
 		this.description = "A +1 en attaque";
@@ -154,12 +154,12 @@ class Attacker extends Player {
 class Architect extends Player {
 	constructor(game, user, id) {
 		super(game, user, id)
-		
+
 		this.name = "Architecte";
 		this.emoji = "🧱";
 		this.description = "Les murs qu'il touche font partie de ses unités pour les combats";
 	}
-	
+
 	getPower(x, y, dx, dy) {
 		var power = 0, tdx = 0, tdy = 0;
 
@@ -178,12 +178,12 @@ class Architect extends Player {
 class Swarm extends Player {
 	constructor(game, user, id) {
 		super(game, user, id)
-		
+
 		this.name = "Essaim";
 		this.emoji = "🐝";
 		this.description = "Commence avec deux unités en plus en ligne";
 	}
-	
+
 	spawn(map, x, y) {
 		map[y][x] = this.index;
 
@@ -192,10 +192,10 @@ class Swarm extends Player {
 
 		if (this.game.inside(x + d1, y + d2) && this.game.inside(x - d1, y - d2) && map[y + d2][x + d1] === -1 && map[y - d2][x - d1] === -1) {
 			map[y + d2][x + d1] = this.index
-			map[y - d2][x - d1] = this.index 
+			map[y - d2][x - d1] = this.index
 		} else {
 			map[y + d1][x + d2] = this.index
-			map[y - d1][x - d2] = this.index 
+			map[y - d1][x - d2] = this.index
 		}
 	}
 }
@@ -204,31 +204,28 @@ class Swarm extends Player {
 class Glitcher extends Player {
 	constructor(game, user, id) {
 		super(game, user, id)
-		
+
 		this.name = "Glitcheur";
 		this.emoji = "👾";
 		this.description = "Peut prendre une fois dans la partie un second tour juste après le sien";
 		this.powerActive = true;
-		
+
 		this.stealTurn = false;
 	}
 
 	activePower() {
 		super.activePower()
-		
+
 		this.powerActive = false;
 		this.stealTurn = true;
 
 		return "️👾 Pouvoir du Glitcheur : Le prochain tour sera le vôtre";
 	}
-	
+
 	onTurnEnd() {
 		if (this.stealTurn) {
 			this.stealTurn = false;
 			this.game.turn = (this.index + this.game.order.length - 1) % this.game.order.length;
-			
-			var moveRow = this.game.moveList[this.game.moveList.length - 1];
-			moveRow[moveRow.length - 1] += "p";
 		}
 	}
 }
@@ -237,23 +234,23 @@ class Glitcher extends Player {
 class Pacifist extends Player {
 	constructor(game, user, id) {
 		super(game, user, id)
-		
+
 		this.name = "Pacifiste";
 		this.emoji = "🕊️";
 		this.description = "Ne peut pas être attaqué par les joueurs qu'il n'a pas attaqué";
-		
+
 		this.variables = {peaceWith: []};
 	}
-	
+
 	spawn(map, x, y) {
 		map[y][x] = this.index;
 		this.variables.peaceWith = JSON.parse(JSON.stringify(this.game.order));
 	}
-	
+
 	onDefense(attack, defense, attacker) {
-		return (this.variables.peaceWith.includes(attacker.id) ? -Infinity : 0); 
+		return (this.variables.peaceWith.includes(attacker.id) ? -Infinity : 0);
 	}
-	
+
 	onAttack(attack, defense, defender) {
 		if (this.variables.peaceWith.includes(defender.id)) this.variables.peaceWith.splice(this.variables.peaceWith.indexOf(defender.id), 1);
 		return 0;
@@ -264,29 +261,29 @@ class Pacifist extends Player {
 class General extends Player {
 	constructor(game, user, id) {
 		super(game, user, id)
-		
+
 		this.name = "Général";
 		this.emoji = "🚩";
 		this.description = "Peut doubler la valeur de ses unités pour deux manches";
 		this.powerActive = true;
-		
+
 		this.variables = {turn: 0};
 	}
-	
+
 	activePower() {
 		super.activePower()
-		
+
 		this.powerActive = false;
 		this.variables.turn = 1;
-		
+
 		return "🚩 Pouvoir du Général : Vos unités valent double pendant les deux prochaines manches"
 	}
-	
+
 	onTurnStart() {
 		this.variables.turn += this.variables.turn ? 1 : 0;
 		if (this.variables.turn == 3) this.variables.turn = 0;
 	}
-	
+
 	getPower(x, y, dx, dy) {
 		return (this.variables.turn ? 2 : 1) * super.getPower(x, y, dx, dy);
 	}
@@ -296,29 +293,29 @@ class General extends Player {
 class Topologist extends Player {
 	constructor(game, user, id) {
 		super(game, user, id)
-		
+
 		this.name = "Topologiste";
 		this.emoji = "🍩";
 		this.description = "Considère les bords du terrain comme adjacents";
 	}
-	
+
 	move(index) {
 		var dx = [-1, 0, 0, 1][index];
 		var dy = [0, -1, 1, 0][index];
 		var symbol = ["L", "U", "D", "R"][index];
-		
+
 		var moveRow = this.game.moveList[this.game.moveList.length - 1]
 		moveRow[moveRow.length - 1] += symbol;
 
 		var new_map = JSON.parse(JSON.stringify(this.game.map));
-		
+
 		this.game.clearLayer();
 
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
 				var nx = (x + dx + this.game.settings.width) % this.game.settings.width;
 				var ny = (y + dy + this.game.settings.height) % this.game.settings.height;
-				
+
 				if (tile == this.index) {
 					var new_tile = this.game.map[ny][nx];
 
@@ -350,7 +347,7 @@ class Topologist extends Player {
 
 		this.game.map = new_map;
 	}
-	
+
 	getPower(x, y, dx, dy) {
 		var power = 0, tx = x, ty = y;
 
