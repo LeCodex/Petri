@@ -4,18 +4,18 @@ class Player {
 	constructor(game, username, id) {
 		this.game = game;
 		this.username = username;
-    this.id = id;
-    this.score = 0;
-    this.timer = null;
-    this.ready = false;
-    this.powerActive = false;
-    this.variables = {};
-    
-    this.prePlay = null;
-    
-    this.name = "Sans Pouvoir";
-	  this.emoji = "🚫";
-	  this.description = "Aucun pouvoir spécial";
+		this.id = id;
+		this.score = 0;
+		this.timer = null;
+		this.ready = false;
+		this.powerActive = false;
+		this.variables = {};
+		
+		this.prePlay = null;
+		
+		this.name = "Sans Pouvoir";
+		this.emoji = "🚫";
+		this.description = "Aucun pouvoir spécial";
 	}
 
 	spawn(map, x, y) {
@@ -25,14 +25,14 @@ class Player {
 	move(index) {
 		var dx = [-1, 0, 0, 1][index];
 		var dy = [0, -1, 1, 0][index];
-    var symbol = ["L", "U", "D", "R"][index];
-    
-    var moveRow = this.game.moveList[this.game.moveList.length - 1];
-    moveRow[moveRow.length - 1] += symbol;
+		var symbol = ["L", "U", "D", "R"][index];
+		
+		var moveRow = this.game.moveList[this.game.moveList.length - 1];
+		moveRow[moveRow.length - 1] += symbol;
 
 		var new_map = JSON.parse(JSON.stringify(this.game.map));
-    
-    this.game.clearLayer();
+		
+		this.game.clearLayer();
 
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
@@ -56,9 +56,9 @@ class Player {
 							this.game.layer[y + dy][x + dx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fdagger_1f5e1-fe0f.png?v=1625421211688"; // 🗡️
 						} else if (diff == 0) {
 							new_map[y + dy][x + dx] = -1;
-              this.game.layer[y + dy][x + dx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fcrossed-swords_2694-fe0f.png?v=1625421210008"; // ⚔️️
+							this.game.layer[y + dy][x + dx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fcrossed-swords_2694-fe0f.png?v=1625421210008"; // ⚔️️
 						} else {
-              this.game.layer[y + dy][x + dx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fshield_1f6e1-fe0f.png?v=1625421210487"; // 🛡️
+							this.game.layer[y + dy][x + dx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fshield_1f6e1-fe0f.png?v=1625421210487"; // 🛡️
 						}
 					}
 				}
@@ -88,47 +88,47 @@ class Player {
 	onDefense(attack, defense, attacker) {
 		return 0;
 	}
-  
-  onTurnStart() {}
-  
-  onTurnEnd() {}
-  
-  activePower() {
-    var moveRow = this.game.moveList[this.game.moveList.length - 1];
-    moveRow[moveRow.length - 1] += "P";
-  }
-  
-  forfeit() {
-    for (var [y, row] of this.game.map.entries()) {
-      for (var [x, tile] of row.entries()) {
-        if (tile == this.index) {
-          this.game.map[y][x] = -1;
-          this.game.layer[y][x] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fskull_1f480.png?v=1625421456016"; // 💀
-        }
-      }
-    }
-    
-    if (this.game.order[this.game.turn] === this.id) {
-      var moveRow = this.game.moveList[this.game.moveList.length - 1];
-      moveRow[moveRow.length - 1] = "X";
-      
-      this.game.nextTurn();
-    } else {
-      this.game.io.in(this.game.id).emit("update gamestate", {map: this.game.map, layer: this.game.layer});
-      this.game.checkWin(); 
-    }
-  }
+	
+	onTurnStart() {}
+	
+	onTurnEnd() {}
+	
+	activePower() {
+		var moveRow = this.game.moveList[this.game.moveList.length - 1];
+		moveRow[moveRow.length - 1] += "P";
+	}
+	
+	forfeit() {
+		for (var [y, row] of this.game.map.entries()) {
+			for (var [x, tile] of row.entries()) {
+				if (tile == this.index) {
+					this.game.map[y][x] = -1;
+					this.game.layer[y][x] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fskull_1f480.png?v=1625421456016"; // 💀
+				}
+			}
+		}
+		
+		if (this.game.order[this.game.turn] === this.id) {
+			var moveRow = this.game.moveList[this.game.moveList.length - 1];
+			moveRow[moveRow.length - 1] = "X";
+			
+			this.game.nextTurn();
+		} else {
+			this.game.io.in(this.game.id).emit("update gamestate", {map: this.game.map, layer: this.game.layer});
+			this.game.checkWin(); 
+		}
+	}
 }
 
 
 class Defender extends Player {
 	constructor(game, user, id) {
-    super(game, user, id)
-    
-    this.name = "Défenseur";
-	  this.emoji = "🛡️";
-	  this.description = "A +1 en défense";
-  }
+		super(game, user, id)
+		
+		this.name = "Défenseur";
+		this.emoji = "🛡️";
+		this.description = "A +1 en défense";
+	}
 
 	onDefense(attack, defense, attacker) {
 		return -1;
@@ -137,13 +137,13 @@ class Defender extends Player {
 
 
 class Attacker extends Player {
-  constructor(game, user, id) {
-    super(game, user, id)
-    
-    this.name = "Attaquant";
-	  this.emoji = "🗡️";
-	  this.description = "A +1 en attaque";
-  }
+	constructor(game, user, id) {
+		super(game, user, id)
+		
+		this.name = "Attaquant";
+		this.emoji = "🗡️";
+		this.description = "A +1 en attaque";
+	}
 
 	onAttack(attack, defense, defender) {
 		return 1;
@@ -152,15 +152,15 @@ class Attacker extends Player {
 
 
 class Architect extends Player {
-  constructor(game, user, id) {
-    super(game, user, id)
-    
-    this.name = "Architecte";
-	  this.emoji = "🧱";
-	  this.description = "Les murs qu'il touche font partie de ses unités pour les combats";
-  }
-  
-  getPower(x, y, dx, dy) {
+	constructor(game, user, id) {
+		super(game, user, id)
+		
+		this.name = "Architecte";
+		this.emoji = "🧱";
+		this.description = "Les murs qu'il touche font partie de ses unités pour les combats";
+	}
+	
+	getPower(x, y, dx, dy) {
 		var power = 0, tdx = 0, tdy = 0;
 
 		while ([-2, this.index].includes(this.game.map[y + tdy][x + tdx])) {
@@ -176,149 +176,149 @@ class Architect extends Player {
 
 
 class Swarm extends Player {
-  constructor(game, user, id) {
-    super(game, user, id)
-    
-    this.name = "Essaim";
-	  this.emoji = "🐝";
-	  this.description = "Commence avec deux unités en plus en ligne";
-  }
-  
-  spawn(map, x, y) {
-    map[y][x] = this.index;
+	constructor(game, user, id) {
+		super(game, user, id)
+		
+		this.name = "Essaim";
+		this.emoji = "🐝";
+		this.description = "Commence avec deux unités en plus en ligne";
+	}
+	
+	spawn(map, x, y) {
+		map[y][x] = this.index;
 
 		var d1 = Math.floor(Math.random() * 2);
 		var d2 = 1 - d1;
 
 		if (this.game.inside(x + d1, y + d2) && this.game.inside(x - d1, y - d2) && map[y + d2][x + d1] === -1 && map[y - d2][x - d1] === -1) {
-      map[y + d2][x + d1] = this.index
+			map[y + d2][x + d1] = this.index
 			map[y - d2][x - d1] = this.index 
-    } else {
-      map[y + d1][x + d2] = this.index
+		} else {
+			map[y + d1][x + d2] = this.index
 			map[y - d1][x - d2] = this.index 
-    }
-  }
+		}
+	}
 }
 
 
 class Glitcher extends Player {
-  constructor(game, user, id) {
-    super(game, user, id)
-    
-    this.name = "Glitcheur";
-	  this.emoji = "👾";
-	  this.description = "Peut prendre une fois dans la partie un second tour juste après le sien";
-    this.powerActive = true;
-    
-    this.stealTurn = false;
-  }
+	constructor(game, user, id) {
+		super(game, user, id)
+		
+		this.name = "Glitcheur";
+		this.emoji = "👾";
+		this.description = "Peut prendre une fois dans la partie un second tour juste après le sien";
+		this.powerActive = true;
+		
+		this.stealTurn = false;
+	}
 
 	activePower() {
-    super.activePower()
-    
-    this.powerActive = false;
+		super.activePower()
+		
+		this.powerActive = false;
 		this.stealTurn = true;
 
 		return "️👾 Pouvoir du Glitcheur : Le prochain tour sera le vôtre";
-  }
-  
-  onTurnEnd() {
-    if (this.stealTurn) {
-      this.stealTurn = false;
-      this.game.turn = (this.index + this.game.order.length - 1) % this.game.order.length;
-      
-      var moveRow = this.game.moveList[this.game.moveList.length - 1];
-      moveRow[moveRow.length - 1] += "p";
-    }
-  }
+	}
+	
+	onTurnEnd() {
+		if (this.stealTurn) {
+			this.stealTurn = false;
+			this.game.turn = (this.index + this.game.order.length - 1) % this.game.order.length;
+			
+			var moveRow = this.game.moveList[this.game.moveList.length - 1];
+			moveRow[moveRow.length - 1] += "p";
+		}
+	}
 }
 
 
 class Pacifist extends Player {
-  constructor(game, user, id) {
-    super(game, user, id)
-    
-    this.name = "Pacifiste";
-	  this.emoji = "🕊️";
-	  this.description = "Ne peut pas être attaqué par les joueurs qu'il n'a pas attaqué";
-    
-    this.variables = {peaceWith: []};
-  }
-  
-  spawn(map, x, y) {
-    map[y][x] = this.index;
-    this.variables.peaceWith = JSON.parse(JSON.stringify(this.game.order));
-  }
-  
-  onDefense(attack, defense, attacker) {
-    return (this.variables.peaceWith.includes(attacker.id) ? -Infinity : 0); 
-  }
-  
-  onAttack(attack, defense, defender) {
-    if (this.variables.peaceWith.includes(defender.id)) this.variables.peaceWith.splice(this.variables.peaceWith.indexOf(defender.id), 1);
-    return 0;
-  }
+	constructor(game, user, id) {
+		super(game, user, id)
+		
+		this.name = "Pacifiste";
+		this.emoji = "🕊️";
+		this.description = "Ne peut pas être attaqué par les joueurs qu'il n'a pas attaqué";
+		
+		this.variables = {peaceWith: []};
+	}
+	
+	spawn(map, x, y) {
+		map[y][x] = this.index;
+		this.variables.peaceWith = JSON.parse(JSON.stringify(this.game.order));
+	}
+	
+	onDefense(attack, defense, attacker) {
+		return (this.variables.peaceWith.includes(attacker.id) ? -Infinity : 0); 
+	}
+	
+	onAttack(attack, defense, defender) {
+		if (this.variables.peaceWith.includes(defender.id)) this.variables.peaceWith.splice(this.variables.peaceWith.indexOf(defender.id), 1);
+		return 0;
+	}
 }
 
 
 class General extends Player {
-  constructor(game, user, id) {
-    super(game, user, id)
-    
-    this.name = "Général";
-	  this.emoji = "🚩";
-	  this.description = "Peut doubler la valeur de ses unités pour deux manches";
-    this.powerActive = true;
-    
-    this.variables = {turn: 0};
-  }
-  
-  activePower() {
-    super.activePower()
-    
-    this.powerActive = false;
-    this.variables.turn = 1;
-    
-    return "🚩 Pouvoir du Général : Vos unités valent double pendant les deux prochaines manches"
-  }
-  
-  onTurnStart() {
-    this.variables.turn += this.variables.turn ? 1 : 0;
-    if (this.variables.turn == 3) this.variables.turn = 0;
-  }
-  
-  getPower(x, y, dx, dy) {
-    return (this.variables.turn ? 2 : 1) * super.getPower(x, y, dx, dy);
-  }
+	constructor(game, user, id) {
+		super(game, user, id)
+		
+		this.name = "Général";
+		this.emoji = "🚩";
+		this.description = "Peut doubler la valeur de ses unités pour deux manches";
+		this.powerActive = true;
+		
+		this.variables = {turn: 0};
+	}
+	
+	activePower() {
+		super.activePower()
+		
+		this.powerActive = false;
+		this.variables.turn = 1;
+		
+		return "🚩 Pouvoir du Général : Vos unités valent double pendant les deux prochaines manches"
+	}
+	
+	onTurnStart() {
+		this.variables.turn += this.variables.turn ? 1 : 0;
+		if (this.variables.turn == 3) this.variables.turn = 0;
+	}
+	
+	getPower(x, y, dx, dy) {
+		return (this.variables.turn ? 2 : 1) * super.getPower(x, y, dx, dy);
+	}
 }
 
 
 class Topologist extends Player {
-  constructor(game, user, id) {
-    super(game, user, id)
-    
-    this.name = "Topologiste";
-	  this.emoji = "🍩";
-	  this.description = "Considère les bords du terrain comme adjacents";
-  }
-  
-  move(index) {
+	constructor(game, user, id) {
+		super(game, user, id)
+		
+		this.name = "Topologiste";
+		this.emoji = "🍩";
+		this.description = "Considère les bords du terrain comme adjacents";
+	}
+	
+	move(index) {
 		var dx = [-1, 0, 0, 1][index];
 		var dy = [0, -1, 1, 0][index];
-    var symbol = ["L", "U", "D", "R"][index];
-    
-    var moveRow = this.game.moveList[this.game.moveList.length - 1]
-    moveRow[moveRow.length - 1] += symbol;
+		var symbol = ["L", "U", "D", "R"][index];
+		
+		var moveRow = this.game.moveList[this.game.moveList.length - 1]
+		moveRow[moveRow.length - 1] += symbol;
 
 		var new_map = JSON.parse(JSON.stringify(this.game.map));
-    
-    this.game.clearLayer();
+		
+		this.game.clearLayer();
 
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
-        var nx = (x + dx + this.game.settings.width) % this.game.settings.width;
-        var ny = (y + dy + this.game.settings.height) % this.game.settings.height;
-        
+				var nx = (x + dx + this.game.settings.width) % this.game.settings.width;
+				var ny = (y + dy + this.game.settings.height) % this.game.settings.height;
+				
 				if (tile == this.index) {
 					var new_tile = this.game.map[ny][nx];
 
@@ -339,9 +339,9 @@ class Topologist extends Player {
 							this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fdagger_1f5e1-fe0f.png?v=1625421211688"; // 🗡️
 						} else if (diff == 0) {
 							new_map[ny][nx] = -1;
-              this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fcrossed-swords_2694-fe0f.png?v=1625421210008"; // ⚔️️
+							this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fcrossed-swords_2694-fe0f.png?v=1625421210008"; // ⚔️️
 						} else {
-              this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fshield_1f6e1-fe0f.png?v=1625421210487"; // 🛡️
+							this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fshield_1f6e1-fe0f.png?v=1625421210487"; // 🛡️
 						}
 					}
 				}
@@ -350,9 +350,9 @@ class Topologist extends Player {
 
 		this.game.map = new_map;
 	}
-  
-  getPower(x, y, dx, dy) {
-    var power = 0, tx = x, ty = y;
+	
+	getPower(x, y, dx, dy) {
+		var power = 0, tx = x, ty = y;
 
 		while (this.game.map[ty][tx] === this.index) {
 			power += 1;
@@ -362,7 +362,7 @@ class Topologist extends Player {
 		}
 
 		return power;
-  }
+	}
 }
 
 module.exports = exports = {Player, Attacker, Defender, Architect, Swarm, Glitcher, Pacifist, General, Topologist};
