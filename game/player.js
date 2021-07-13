@@ -22,11 +22,17 @@ class Player {
 		map[y][x] = this.index;
 	}
 
-	move(index) {
+	play(index) {
 		var dx = [-1, 0, 0, 1][index];
 		var dy = [0, -1, 1, 0][index];
 		var symbol = ["L", "U", "D", "R"][index];
 
+		this.move(dx, dy, symbol);
+
+		this.game.nextTurn();
+	}
+
+	move(dx, dy, symbol) {
 		var moveRow = this.game.moveList[this.game.moveList.length - 1];
 		moveRow[moveRow.length - 1] += symbol;
 
@@ -36,36 +42,40 @@ class Player {
 
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
-				if (tile == this.index && this.game.inside(x + dx, y + dy)) {
-					var new_tile = this.game.map[y + dy][x + dx];
-
-					if (new_tile == -1) {
-						new_map[y + dy][x + dx] = this.index;
-					} else if (new_tile != this.index && new_tile >= 0) {
-						var owner = this.game.players[this.game.order[new_tile]];
-
-						var attack = this.getPower(x, y, -dx, -dy);
-						var defense = owner.getPower(x + dx, y + dy, dx, dy);
-
-						var diff = attack - defense;
-						diff += this.onAttack(attack, defense, owner);
-						diff += owner.onDefense(attack, defense, this);
-
-						if (diff > 0) {
-							new_map[y + dy][x + dx] = this.index;
-							this.game.layer[y + dy][x + dx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fdagger_1f5e1-fe0f.png?v=1625421211688"; // 🗡️
-						} else if (diff == 0) {
-							new_map[y + dy][x + dx] = -1;
-							this.game.layer[y + dy][x + dx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fcrossed-swords_2694-fe0f.png?v=1625421210008"; // ⚔️️
-						} else {
-							this.game.layer[y + dy][x + dx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fshield_1f6e1-fe0f.png?v=1625421210487"; // 🛡️
-						}
-					}
-				}
+				this.moveTile(new_map, x, y, x + dx, y + dy);
 			}
 		}
 
 		this.game.map = new_map;
+	}
+
+	moveTile(map, x, y, nx, ny) {
+		if (this.game.map[y][x] == this.index && this.game.inside(nx, ny)) {
+			var new_tile = this.game.map[ny][nx];
+
+			if (new_tile == -1) {
+				map[ny][nx] = this.index;
+			} else if (new_tile != this.index && new_tile >= 0) {
+				var owner = this.game.players[this.game.order[new_tile]];
+
+				var attack = this.getPower(x, y, -dx, -dy);
+				var defense = owner.getPower(nx, ny, dx, dy);
+
+				var diff = attack - defense;
+				diff += this.onAttack(attack, defense, owner);
+				diff += owner.onDefense(attack, defense, this);
+
+				if (diff > 0) {
+					map[ny][nx] = this.index;
+					this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fdagger_1f5e1-fe0f.png?v=1625421211688"; // 🗡️
+				} else if (diff == 0) {
+					map[ny][nx] = -1;
+					this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fcrossed-swords_2694-fe0f.png?v=1625421210008"; // ⚔️️
+				} else {
+					this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fshield_1f6e1-fe0f.png?v=1625421210487"; // 🛡️
+				}
+			}
+		}
 	}
 
 	getPower(x, y, dx, dy) {
@@ -222,10 +232,17 @@ class Glitcher extends Player {
 		return "️👾 Pouvoir du Glitcheur : Le prochain tour sera le vôtre";
 	}
 
-	onTurnEnd() {
+	play(index) {
+		var dx = [-1, 0, 0, 1][index];
+		var dy = [0, -1, 1, 0][index];
+		var symbol = ["L", "U", "D", "R"][index];
+
+		this.move(dx, dy, symbol);
+
 		if (this.stealTurn) {
 			this.stealTurn = false;
-			this.game.turn = (this.index + this.game.order.length - 1) % this.game.order.length;
+		} else {
+			this.game.nextTurn();
 		}
 	}
 }
@@ -299,12 +316,8 @@ class Topologist extends Player {
 		this.description = "Considère les bords du terrain comme adjacents";
 	}
 
-	move(index) {
-		var dx = [-1, 0, 0, 1][index];
-		var dy = [0, -1, 1, 0][index];
-		var symbol = ["L", "U", "D", "R"][index];
-
-		var moveRow = this.game.moveList[this.game.moveList.length - 1]
+	move(dx, dy, symbol) {
+		var moveRow = this.game.moveList[this.game.moveList.length - 1];
 		moveRow[moveRow.length - 1] += symbol;
 
 		var new_map = JSON.parse(JSON.stringify(this.game.map));
@@ -316,32 +329,7 @@ class Topologist extends Player {
 				var nx = (x + dx + this.game.settings.width) % this.game.settings.width;
 				var ny = (y + dy + this.game.settings.height) % this.game.settings.height;
 
-				if (tile == this.index) {
-					var new_tile = this.game.map[ny][nx];
-
-					if (new_tile == -1) {
-						new_map[ny][nx] = this.index;
-					} else if (new_tile != this.index && new_tile >= 0) {
-						var owner = this.game.players[this.game.order[new_tile]];
-
-						var attack = this.getPower(x, y, -dx, -dy);
-						var defense = owner.getPower(nx, ny, dx, dy);
-
-						var diff = attack - defense
-						diff += this.onAttack(attack, defense, new_tile)
-						diff += owner.onDefense(attack, defense, this)
-
-						if (diff > 0) {
-							new_map[ny][nx] = this.index;
-							this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fdagger_1f5e1-fe0f.png?v=1625421211688"; // 🗡️
-						} else if (diff == 0) {
-							new_map[ny][nx] = -1;
-							this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fcrossed-swords_2694-fe0f.png?v=1625421210008"; // ⚔️️
-						} else {
-							this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fshield_1f6e1-fe0f.png?v=1625421210487"; // 🛡️
-						}
-					}
-				}
+				this.moveTile(new_map, x, y, nx, ny);
 			}
 		}
 
