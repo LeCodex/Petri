@@ -23,13 +23,13 @@ class Game {
 		this.id = id;
 		this.admin = admin;
 		this.data = data;
-		
+
 		this.isPrivate = true;
 		this.withPowers = false;
 		this.waitingForChoice = [];
 		this.timerType = 0;
 		this.timer = null;
-		
+
 		this.players = {};
 		this.order = [];
 		this.spawns = [];
@@ -38,7 +38,7 @@ class Game {
 		this.map = [];
 		this.layer = [];
 		this.moveList = [];
-		
+
 		this.defaults = {
 			height: 10,
 			width: 10,
@@ -57,22 +57,22 @@ class Game {
 			wallAmount: x => x >= 0,
 			timer: x => x >= 10 && x <= 9999
 		};
-		
+
 		this.version = "9.1";
 		this.initialMap = "";
 	}
-	
+
 	inside(x, y) {
 		return y >= 0 && y < this.settings.height && x >= 0 && x < this.settings.width
 	}
-	
+
 	sendPlayerList() {
 		this.defaults.height = this.defaults.width = Math.max(10, 6 + 2 * this.order.length);
 		this.defaults.wallAmount = Math.max(2, 1 + Math.floor(this.order.length / 2));
-		
+
 		this.io.in(this.id).emit("update gamestate", {playerList: Object.values(this.players).map(e => { return {id: e.id, username: e.username, ready: e.ready, orderIndex: this.order.indexOf(e.id), index: e.index, score: e.score, power: e.emoji} }), admin: this.admin, defaults: this.defaults});
 	}
-	
+
 	clearLayer() {
 		for (var [y, row] of this.layer.entries()) {
 			for (var [x, tile] of row.entries()) {
@@ -89,19 +89,19 @@ class Game {
 			this.players[id].index = i;
 			this.players[id].ready = false;
 		}
-	
+
 		this.settings = Object.keys(this.settings).reduce((a, e) => { a[e] = (this.settings[e] ? this.settings[e] : this.defaults[e]); return a }, {});
 		this.createMap();
 
 		this.turn = 0;
-		
+
 		this.updateScores();
-		
+
 		const sockets = await this.io.in(this.id).fetchSockets();
 		for (var s of sockets) {
-			s.emit("update gamestate", {selfTurn: this.order.indexOf(s.id), map: this.map, layer: this.layer, turn: this.turn, round: this.round, moveList: this.moveList}); 
+			s.emit("update gamestate", {selfTurn: this.order.indexOf(s.id), map: this.map, layer: this.layer, turn: this.turn, round: this.round, moveList: this.moveList});
 		}
-		
+
 		if (this.timerType) {
 			for (var id of this.order) this.players[id].timer = this.settings.timer;
 			this.io.in(this.id).emit("timers", this.order.map(e => this.players[e].timer));
@@ -113,7 +113,7 @@ class Game {
 		this.map = [];
 		this.layer = [];
 		this.moveList = [[""]];
-		
+
 		for (var y = 0; y < this.settings.height; y ++) {
 			this.map.push([])
 			this.layer.push([]);
@@ -161,17 +161,17 @@ class Game {
 			}
 
 			var r = Math.round(Math.min(this.settings.height, this.settings.width)/3), a = Math.random() * Math.PI * 2
-			
+
 			this.spawns = [];
 			for (var i = 0; i < this.order.length; i++) {
 				var id = this.order[i];
 
 				while (new_map[Math.round(this.settings.height/2 - .5 + r * Math.sin(a))][Math.round(this.settings.width/2 - .5 + r * Math.cos(a))] != -1) a += Math.PI / 20
-				
+
 				var x = Math.round(this.settings.width/2 - .5 + r * Math.cos(a)), y = Math.round(this.settings.height/2 - .5 + r * Math.sin(a))
 				this.spawns.push([x, y]);
 				this.players[id].spawn(new_map, x, y);
-				
+
 				a += Math.PI / this.order.length * 2;
 			}
 
@@ -180,7 +180,7 @@ class Game {
 
 		this.map = new_map;
 	}
-	
+
 	updateScores() {
 		for (var id of this.order) this.players[id].score = 0;
 
@@ -191,27 +191,27 @@ class Game {
 	nextTurn(player, message) {
 		if (!this.checkWin()) {
 			if (this.timerType === 1) this.players[this.order[this.turn]].timer = this.settings.timer;
-			
+
 			var oldTurn = this.turn
 			do {
 				if (this.turn != oldTurn) {
 					var moveRow = this.moveList[this.moveList.length - 1];
 					moveRow[moveRow.length - 1] = "-";
 				}
-				
+
 				this.players[this.order[this.turn]].onTurnEnd();
-				
+
 				this.turn = (this.turn + 1) % this.order.length
 				if (this.turn == 0) {
 					this.round += 1;
 					this.moveList.push([]);
-					
+
 					if (this.round === 2 && this.timerType) {
 						this.timer = setInterval(() => {
 							var current = this.players[this.order[this.turn]];
 							current.timer -= 0.1;
 							this.io.in(this.id).emit("timers", this.order.map(e => this.players[e].timer));
-							
+
 							if (current.timer <= 0) {
 								this.io.in(this.id).emit("message", current.username + " timed out ⏲");
 								current.forfeit();
@@ -220,13 +220,13 @@ class Game {
 					}
 				}
 				this.moveList[this.moveList.length - 1].push("");
-				
+
 				this.players[this.order[this.turn]].onTurnStart();
-			} while (!this.players[this.order[this.turn]].score); 
-			
+			} while (!this.players[this.order[this.turn]].score);
+
 			if (this.round >= 40) {
 				var maxScore = 0, index = 0, unique = true;
-				
+
 				for (var [i, id] of this.order.entries()) {
 					if (this.players[id].score > maxScore) {
 						maxScore = this.players[id].score;
@@ -236,25 +236,25 @@ class Game {
 						unique = false;
 					}
 				}
-				
+
 				if (unique) this.endGame(index, "Usure");
 			}
-			
+
 			if (this.turn !== -1) {
 				var current = this.players[this.order[this.turn]];
-				if (current.prePlay !== null) setTimeout(() => { current.move(current.prePlay); current.prePlay = null; this.nextTurn() }, 100);
+				if (current.prePlay !== null) setTimeout(() => { current.play(current.prePlay); current.prePlay = null; this.nextTurn() }, 100);
 			}
 		}
-		
+
 		this.io.in(this.id).emit("update gamestate", {map: this.map, layer: this.layer, turn: this.turn, round: this.round, moveList: this.moveList});
 		this.sendPlayerList();
 	}
-	
+
 	checkWin() {
 		this.updateScores()
-		
+
 		var alive = this.order.map(e => this.players[e]).filter(e => e.score);
-		
+
 		if (alive.length == 1) {
 			this.endGame(this.order.indexOf(alive[0].id), "Annihilation");
 			return true;
@@ -266,7 +266,7 @@ class Game {
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
 
@@ -277,7 +277,7 @@ class Game {
 			.setDescription(sorted.map((e, i) => this.mainclass.NUMBER_EMOJIS[i] + globals.PLAYER_EMOJIS[e.index] + " " + e.user.toString() + ": " + e.score).join("\n"))
 			.setColor(this.mainclass.color)
 		); */
-		
+
 		var stat = {
 			powers: this.order.map(e => this.players[e].constructor.name),
 			scores: this.order.map(e => this.players[e].score),
@@ -290,21 +290,21 @@ class Game {
 		console.log(stat);
 		this.data.stats.push(stat);
 		saveData(this.data);
-		
+
 		this.turn = -1;
 		this.round = 1;
 		this.settings = Object.keys(this.settings).reduce((a, e) => { a[e] = (this.settings[e] === this.defaults[e] ? null : this.settings[e]); return a }, {});
-		
+
 		clearInterval(this.timer);
 		this.timer = null;
-		
+
 		this.io.in(this.id).emit("message", "Victoire de " + this.players[this.order[index]].username + " par " + reason + "!");
 		this.io.in(this.id).emit("update gamestate", {turn: this.turn});
-		
+
 		for (var id of this.order) {
 			this.players[id] = new Player(this, this.players[id].username, id);
 		}
-		
+
 		this.sendPlayerList();
 	}
 }
