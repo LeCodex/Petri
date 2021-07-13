@@ -1,0 +1,78 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Petri</title>
+    
+    <meta charset="utf-8">
+    <meta content="Petri" property="og:title" />
+    <meta content="A simple and kinda silly strategy game" property="og:description" />
+    <meta content="petri-game.glitch.me" property="og:url" />
+    <meta content="https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fpetri-dish_1f9eb.png?v=1625305436122" property="og:image" />
+    <meta content="#00FFBF" data-react-helmet="true" name="theme-color" />
+    
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fpetri-dish_1f9eb.png?v=1625305436122" type="image/icon type">
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+  </head>
+  <body>
+    <div id="joinArea">
+      <ul>
+        <img style="margin-right: auto; margin-left: auto; margin-bottom: 10px; margin-top: 10px; display: block; width: 150px" src="https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fpetri-dish_1f9eb.png?v=1625305436122">
+        <li id="usernameLine"><input id="usernameInput" type="text" placeholder="Pseudonyme" autocomplete="off"/><button id="gameCreationButton">Créer une partie</button></li>
+        <li id="joinLine"><input id="gameIDInput" type="text" placeholder="ID de partie (Random)" autocomplete="off"/><button id="gameJoinButton">Rejoindre la partie</button></li>
+        <li id="publicGamesLine">Parties publiques: <span id="publicGamesCount"></span></li>
+      </ul>
+    </div>
+    
+    <div id="gameArea" hidden>
+      <ul class="infoList" id="playerList"></ul>
+      <ul class="infoList" id="moveList"></ul>
+      <div id="gameControls" class="noSelect">
+        <ul>
+          <li>
+            <button id="gameLeaveButton">Quitter la partie</button>
+            <button id="readyButton">Prêt?</button>
+            <button id="spectateButton">Devenir spectateur</button>
+            <button id="colorblindButton">Daltonien: off</button>
+          </li>
+          <li>
+            <div><span>Longueur du plateau:</span> <input type="text" class="gameValueInput" id="widthInput" placeholder="10" autocomplete="off" disabled/></div>
+            <div><span>Hauteur du plateau:</span> <input type="text" class="gameValueInput" id="heightInput" placeholder="10" autocomplete="off" disabled/></div>
+            <div><span>Nombre de murs par quartier:</span> <input type="text" class="gameValueInput" id="wallAmountInput" placeholder="2" autocomplete="off" disabled/></div>
+          </li>
+          <li>
+            <button id="privacyButton" disabled>Partie privée</button>
+            <button id="powersButton" disabled>Pouvoirs désactivés</button>
+          </li>
+          <li>
+            <button id="timerButton" disabled>Pas de timer</button> <input type="text" class="gameValueInput" id="timerInput" placeholder="30" autocomplete="off" disabled/> <span>secondes</span>
+          </li>
+        </ul>
+      </div>
+      <ul>
+        <li>
+          <table id="gameMap"></table>
+        </li>
+        <li>
+          <ul class="infoList" id="eventList">
+            <li><i>Events will be displayed here.</i></li>
+          </ul>
+          <input id="inputMessage" placeholder="Taper ici..."/>
+        </li>
+      </ul>
+    </div>
+    
+    <div id="powersMenu" hidden>
+      <ul id="powersList" class="noSelect"></ul>
+    </div>
+    
+    <script>
+      $(function() {
+          if (localStorage.username) $('#usernameInput').val(localStorage.username);
+      });
+    </script>
+    <script src="client.js" type="module"></script>
+  </body>
+</html>
