@@ -164,15 +164,15 @@ $exitButton.addEventListener("click", function(evt) {
 	$settingsMenu[0].hidden = true;
 });
 
-var settings = {};
 function updateSetting(input, key) {
 	localStorage.settings = JSON.stringify(settings);
 	$settingsInput[key].update(input, key);
 }
 
 if (localStorage.settings === undefined) localStorage.settings = "{}";
+var settings = JSON.parse(localStorage.settings);
 for (var [key, value] of Object.entries($settingsInput)) {
-	settings[key] = JSON.parse(localStorage.settings)[key] ?? value.default;
+	settings[key] = settings[key] ?? value.default;
 	updateSetting(value.input, key);
 
 	for (var [name, fnc] of Object.entries(value.events)) value.input.addEventListener(name, fnc);
