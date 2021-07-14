@@ -157,11 +157,11 @@ var $settingsInput = {
 var $exitButton = $("#exitButton")[0];
 
 $settingsButton.addEventListener("click", function(evt) {
-	$settingsMenu.show();
+	$settingsMenu[0].hidden = false;
 });
 
 $exitButton.addEventListener("click", function(evt) {
-	$settingsMenu.hide();
+	$settingsMenu[0].hidden = true;
 });
 
 var settings = {};
