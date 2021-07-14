@@ -124,6 +124,27 @@ io.on('connection', (socket) => {
 		}, {});
 	}
 
+	function testForGameStart() {
+		if (!game.order.map(e => game.players[e]).filter(e => !e.ready).length && game.order.length > 1) {
+			await game.startGame();
+			io.in(game.id).emit("message", "Game has started with players " + game.order.map(e => game.players[e].username).join(", "));
+
+			if (game.withPowers) {
+				game.waitingForChoice = game.order.map(e => true);
+				io.in(game.id).emit("message", "Waiting for everyone to choose their power...");
+
+				var sockets = await io.in(game.id).fetchSockets();
+				for (var s of sockets) if (game.order.includes(s.id)) s.emit("select power");
+			} else {
+				game.initialMap = compressMap(game.map);
+			}
+
+			return true;
+		}
+
+		return false;
+	}
+
 	socket.on('join', (username, room) => {
 		if (game) return;
 
@@ -185,20 +206,7 @@ io.on('connection', (socket) => {
 
 		io.in(game.id).emit("message", game.players[socket.id].username + " is " + (!state ? "not ready ❌" : "ready ✅"));
 
-		if (!game.order.map(e => game.players[e]).filter(e => !e.ready).length && game.order.length > 1) {
-			await game.startGame();
-			io.in(game.id).emit("message", "Game has started with players " + game.order.map(e => game.players[e].username).join(", "));
-
-			if (game.withPowers) {
-				game.waitingForChoice = game.order.map(e => true);
-				io.in(game.id).emit("message", "Waiting for everyone to choose their power...");
-
-				var sockets = await io.in(game.id).fetchSockets();
-				for (var s of sockets) if (game.order.includes(s.id)) s.emit("select power");
-			} else {
-				game.initialMap = compressMap(game.map)
-			}
-		} else {
+		if (!testForGameStart()) {
 			socket.emit("ready", state);
 		}
 
@@ -259,7 +267,9 @@ io.on('connection', (socket) => {
 		if (state_string.length) io.in(game.id).emit("message", game.players[socket.id].username + state_string);
 		socket.emit("spectate", !game.order.includes(socket.id));
 
-		game.sendPlayerList();
+		if (!testForGameStart()) {
+			game.sendPlayerList();
+		}
 	});
 
 	socket.on('private', (state) => {

@@ -174,7 +174,7 @@ for (var [key, value] of Object.entries($settingsInput)) {
 	settings[key] = settings[key] ?? value.default;
 	updateSetting(value.input, key);
 
-	for (var [name, fnc] of Object.entries(value.events)) value.input.addEventListener(name, fnc);
+	for (var [name, fcn] of Object.entries(value.events)) value.input.addEventListener(name, fcn);
 }
 
 var $window = $(window);

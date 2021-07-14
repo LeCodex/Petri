@@ -271,13 +271,6 @@ class Game {
 	}
 
 	endGame(index, reason) {
-		/* this.channel.send(
-			new MessageEmbed()
-			.setTitle()
-			.setDescription(sorted.map((e, i) => this.mainclass.NUMBER_EMOJIS[i] + globals.PLAYER_EMOJIS[e.index] + " " + e.user.toString() + ": " + e.score).join("\n"))
-			.setColor(this.mainclass.color)
-		); */
-
 		var stat = {
 			powers: this.order.map(e => this.players[e].constructor.name),
 			scores: this.order.map(e => this.players[e].score),
@@ -309,4 +302,4 @@ class Game {
 	}
 }
 
-module.exports = exports = Game
+module.exports = exports = Game;
