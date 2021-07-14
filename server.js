@@ -267,7 +267,7 @@ io.on('connection', (socket) => {
 		if (state_string.length) io.in(game.id).emit("message", game.players[socket.id].username + state_string);
 		socket.emit("spectate", !game.order.includes(socket.id));
 
-		if (game.turn !== -1) await testForGameStart();
+		if (game.turn === -1) await testForGameStart();
 
     	game.sendPlayerList();
 	});
