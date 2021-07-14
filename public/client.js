@@ -175,9 +175,7 @@ for (var [key, value] of Object.entries($settingsInput)) {
 	settings[key] = JSON.parse(localStorage.settings)[key] ?? value.default;
 	updateSetting(value.input, key);
 
-	for (var [name, fnc] of Object.entries(value.events)) {
-		value.input.addEventListener(name, fnc);
-	}
+	for (var [name, fnc] of Object.entries(value.events)) value.input.addEventListener(name, fnc);
 }
 
 var $window = $(window);
@@ -255,7 +253,7 @@ function redrawMap() {
 			td.height = td.width = tileSize + "px";
 			td.bgColor = tile < 0 ? ["white", "black"][tile + 2] : globals.PLAYER_COLORS[tile];
 
-			if (layer[y][x].length || (colorblind && tile >= 0)) {
+			if (layer[y][x].length || (settings.colorblind && tile >= 0)) {
 				var img = document.createElement("img");
 				img.src = layer[y][x].length ? layer[y][x] : SYMBOLS[tile];
 				td.appendChild(img);
