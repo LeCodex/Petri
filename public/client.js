@@ -265,8 +265,11 @@ function redrawMap() {
 }
 
 function updatePlayerList() {
-	if (turn !== -1) playerList.sort((a, b) => a.orderIndex === -1 ? 1 : a.orderIndex - b.orderIndex);
-	
+	if (turn !== -1) {
+		playerList.sort((a, b) => a.orderIndex === -1 ? 1 : (b.orderIndex === -1 ? -1 : a.orderIndex - b.orderIndex));
+		// console.log(playerList);
+	}
+
 	$playerList[0].innerHTML = "";
 	for (var i = 0; i < playerList.length; i++) {
 		var player = playerList[i];
