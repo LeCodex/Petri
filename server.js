@@ -124,7 +124,7 @@ io.on('connection', (socket) => {
 		}, {});
 	}
 
-	function testForGameStart() {
+	async function testForGameStart() {
 		if (!game.order.map(e => game.players[e]).filter(e => !e.ready).length && game.order.length > 1) {
 			await game.startGame();
 			io.in(game.id).emit("message", "Game has started with players " + game.order.map(e => game.players[e].username).join(", "));
@@ -206,7 +206,7 @@ io.on('connection', (socket) => {
 
 		io.in(game.id).emit("message", game.players[socket.id].username + " is " + (!state ? "not ready ❌" : "ready ✅"));
 
-		if (!testForGameStart()) {
+		if (!await testForGameStart()) {
 			socket.emit("ready", state);
 		}
 
@@ -243,7 +243,7 @@ io.on('connection', (socket) => {
 		socket.emit("power selected");
 	})
 
-	socket.on('spectate', (state) => {
+	socket.on('spectate', async (state) => {
 		if (!game) return;
 		if (game.order.includes(socket.id) !== state) { socket.emit("spectate", state); return; } // Only go to spectator if in the players, and vice versa. Also correct if client desynced
 		if (!state && (game.order.length === 6 || game.turn !== -1)) return; // Only allow joining if there are less than 6 players and before the game starts
@@ -267,7 +267,7 @@ io.on('connection', (socket) => {
 		if (state_string.length) io.in(game.id).emit("message", game.players[socket.id].username + state_string);
 		socket.emit("spectate", !game.order.includes(socket.id));
 
-		if (!testForGameStart()) {
+		if (!await testForGameStart()) {
 			game.sendPlayerList();
 		}
 	});
