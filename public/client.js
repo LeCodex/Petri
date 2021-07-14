@@ -120,7 +120,7 @@ var $powersMenu = $("#powersMenu");
 var $powersList = $("#powersList");
 
 var $settingsButton = $("#settingsButton")[0];
-var $settingsMenu = $("#settingsMenu")[0];
+var $settingsMenu = $("#settingsMenu");
 var $settingsInput = {
 	colorblind: {
 		input: $("#colorblindButton")[0],
