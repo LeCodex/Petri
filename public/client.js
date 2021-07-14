@@ -122,8 +122,37 @@ var $powersList = $("#powersList");
 var $settingsButton = $("#settingsButton")[0];
 var $settingsMenu = $("#settingsMenu")[0];
 var $settingsInput = {
-	colorblindButton: $("#colorblindButton")[0],
-	prePlayButton: $("#prePlayButton")[0]
+	colorblind: {
+		input: $("#colorblindButton")[0],
+		default: false,
+		update: function(input, key) {
+			input.innerHTML = input.innerHTML.split(":")[0] + ": " + (settings[key] ? "on" : "off");
+		},
+		events: {
+			click: function(event) {
+				var input = event.target;
+				var name = input.id.slice(0, -6);
+				settings[name] = !settings[name];
+				updateSetting(input, name);
+				redrawMap();
+			}
+		}
+	},
+	prePlay: {
+		input: $("#prePlayButton")[0],
+		default: false,
+		update: function(input, key) {
+			input.innerHTML = input.innerHTML.split(":")[0] + ": " + (settings[key] ? "on" : "off");
+		},
+		events: {
+			click: function(event) {
+				var input = event.target;
+				var name = input.id.slice(0, -6);
+				settings[name] = !settings[name];
+				updateSetting(input, name);
+			}
+		}
+	}
 };
 var $exitButton = $("#exitButton")[0];
 
@@ -136,23 +165,19 @@ $exitButton.addEventListener("click", function(evt) {
 });
 
 var settings = {};
-function updateSetting(input, name) {
+function updateSetting(input, key) {
 	localStorage.settings = JSON.stringify(settings);
-	input.innerHTML = input.innerHTML.split(":")[0] + ": " + (settings[name] ? "on" : "off");
+	$settingsInput[key].update(input, key);
 }
 
 if (localStorage.settings === undefined) localStorage.settings = "{}";
 for (var [key, value] of Object.entries($settingsInput)) {
-	var name = key.slice(0, -6);
-	settings[name] = localStorage.settings[name] ?? false;
-	updateSetting(value, name);
+	settings[key] = localStorage.settings[key] ?? value.default;
+	updateSetting(value.input, key);
 
-	value.addEventListener("click", function(event) {
-		var input = event.target;
-		var n = input.id.slice(0, -6);
-		settings[n] = !settings[n];
-		updateSetting(input, n);
-	});
+	for (var [name, fnc] of Object.entries(value.events)) {
+		value.input.addEventListener(name, fnc);
+	}
 }
 
 var $window = $(window);
@@ -206,72 +231,72 @@ function mouseY(evt) {
 	}
 }
 
+function redrawMap() {
+	if (!map.length) return;
+
+	var goalColor = globals.PLAYER_COLORS[turn] ?? "#FFFFFF";
+
+	$map.innerHTML = "";
+	$map.animate({borderColor: goalColor}, 500).finished.then(() => { $map.style.borderColor = goalColor; });
+
+	var tileSize = Math.min((window.innerWidth * .4 - 12) / map[0].length, (window.innerHeight * .7 - 12) / map.length) - 1; // Use the amount of tiles on the dimensiosn used as the size of the "square"
+	console.log(tileSize);
+
+	for (var [y, row] of map.entries()) {
+		var tr = document.createElement('tr');
+		for (var [x, tile] of row.entries()) {
+			var td = document.createElement('td');
+
+			// var filler = document.createElement('div');
+			// filler.
+			// td.appendChild(filler)
+
+			td.classList.add("gameTile", "noSelect");
+			td.height = td.width = tileSize + "px";
+			td.bgColor = tile < 0 ? ["white", "black"][tile + 2] : globals.PLAYER_COLORS[tile];
+
+			if (layer[y][x].length || (colorblind && tile >= 0)) {
+				var img = document.createElement("img");
+				img.src = layer[y][x].length ? layer[y][x] : SYMBOLS[tile];
+				td.appendChild(img);
+			}
+
+			tr.appendChild(td);
+		}
+		$map.appendChild(tr);
+	}
+}
+
+function updatePlayerList() {
+	$playerList[0].innerHTML = "";
+	for (var i = 0; i < playerList.length; i++) {
+		var player = playerList[i];
+		var element = $("<li>");
+
+		var spectating_or_order = player.orderIndex === -1 ? "👻 " : (turn > -1 ? globals.NUMBER_EMOJIS[player.orderIndex] + " " : "");
+		var powerEmoji = withPowers && turn !== -1 && player.orderIndex !== -1 ? player.power + " " : ""
+		var text = spectating_or_order + powerEmoji + player.username + (player.ready ? " ✅" : "") + (player.id === admin ? " 👑" : "");
+
+		if (turn !== -1 && player.orderIndex !== -1) {
+			element[0].style.color = globals.PLAYER_COLORS[player.index];
+			text += " : " + player.score;
+
+			if (timerType) text += " (" + secondsToString(timers[player.orderIndex]) + ")";
+		}
+
+		if (player.orderIndex === -1) element[0].style.fontStyle = "italic";
+
+		element.text(text);
+		$playerList.append(element);
+	}
+}
+
 $(function() {
 	var socket = io();
 
 	window.onresize = function(event) {
 		redrawMap();
 	};
-
-	function redrawMap() {
-		if (!map.length) return;
-
-		var goalColor = globals.PLAYER_COLORS[turn] ?? "#FFFFFF";
-
-		$map.innerHTML = "";
-		$map.animate({borderColor: goalColor}, 500).finished.then(() => { $map.style.borderColor = goalColor; });
-
-		var tileSize = Math.min((window.innerWidth * .4 - 12) / map[0].length, (window.innerHeight * .7 - 12) / map.length) - 1; // Use the amount of tiles on the dimensiosn used as the size of the "square"
-		console.log(tileSize);
-
-		for (var [y, row] of map.entries()) {
-			var tr = document.createElement('tr');
-			for (var [x, tile] of row.entries()) {
-				var td = document.createElement('td');
-
-				// var filler = document.createElement('div');
-				// filler.
-				// td.appendChild(filler)
-
-				td.classList.add("gameTile", "noSelect");
-				td.height = td.width = tileSize + "px";
-				td.bgColor = tile < 0 ? ["white", "black"][tile + 2] : globals.PLAYER_COLORS[tile];
-
-				if (layer[y][x].length || (colorblind && tile >= 0)) {
-					var img = document.createElement("img");
-					img.src = layer[y][x].length ? layer[y][x] : SYMBOLS[tile];
-					td.appendChild(img);
-				}
-
-				tr.appendChild(td);
-			}
-			$map.appendChild(tr);
-		}
-	}
-
-	function updatePlayerList() {
-		$playerList[0].innerHTML = "";
-		for (var i = 0; i < playerList.length; i++) {
-			var player = playerList[i];
-			var element = $("<li>");
-
-			var spectating_or_order = player.orderIndex === -1 ? "👻 " : (turn > -1 ? globals.NUMBER_EMOJIS[player.orderIndex] + " " : "");
-			var powerEmoji = withPowers && turn !== -1 && player.orderIndex !== -1 ? player.power + " " : ""
-			var text = spectating_or_order + powerEmoji + player.username + (player.ready ? " ✅" : "") + (player.id === admin ? " 👑" : "");
-
-			if (turn !== -1 && player.orderIndex !== -1) {
-				element[0].style.color = globals.PLAYER_COLORS[player.index];
-				text += " : " + player.score;
-
-				if (timerType) text += " (" + secondsToString(timers[player.orderIndex]) + ")";
-			}
-
-			if (player.orderIndex === -1) element[0].style.fontStyle = "italic";
-
-			element.text(text);
-			$playerList.append(element);
-		}
-	}
 
 	function choosePower(evt) {
 		var index = $(evt.srcElement).index();
@@ -329,13 +354,6 @@ $(function() {
 	$spectateButton.addEventListener("click", function() {
 		if (!spectating && ready) socket.emit('ready', false);
 		socket.emit('spectate', !spectating);
-	});
-
-	$colorblindButton.addEventListener("click", function() {
-		colorblind = !colorblind;
-
-		$colorblindButton.innerHTML = "Daltonien: " + (colorblind ? "on" : "off");
-		redrawMap();
 	});
 
 	$gameInputs.privacyButton.addEventListener("click", function() {
