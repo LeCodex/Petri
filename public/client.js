@@ -135,12 +135,10 @@ $exitButton.addEventListener("click", function(evt) {
 	$settingsMenu.hide();
 });
 
-
-
 var settings = {};
 function updateSetting(input, name) {
 	localStorage.settings = JSON.stringify(settings);
-	input.innerHTML = input.innerHMTL.split(":")[0] + ": " + (settings[name] ? "on" : "off");
+	input.innerHTML = input.innerHTML.split(":")[0] + ": " + (settings[name] ? "on" : "off");
 }
 
 if (localStorage.settings === undefined) localStorage.settings = "{}";
