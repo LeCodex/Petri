@@ -147,7 +147,7 @@ for (var [key, value] of Object.entries($settingsInput)) {
 	settings[name] = localStorage.settings[name] ?? false;
 	updateSetting(value, name);
 
-	input.addEventListener("click", function(event) {
+	value.addEventListener("click", function(event) {
 		var input = event.target;
 		var n = input.id.slice(0, -6);
 		settings[n] = !settings[n];
