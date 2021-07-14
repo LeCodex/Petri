@@ -303,7 +303,7 @@ io.on('connection', (socket) => {
 		io.in(game.id).emit("update gamestate", {settings: game.settings, valid: generateSettingsValidity()});
 	})
 
-	socket.on('input', (index) => {
+	socket.on('input', (index, canPrePlay) => {
 		if (!game) return;
 		if (game.waitingForChoice.length) return;
 		if (game.turn === -1) return;
@@ -316,7 +316,7 @@ io.on('connection', (socket) => {
 			} else if (index == 4 && game.players[socket.id].powerActive) {
 				io.in(game.id).emit("message", game.players[socket.id].activePower());
 			}
-		} else if (index < 4 && game.players[socket.id].prePlay !== index) {
+		} else if (index < 4 && game.players[socket.id].prePlay !== index && canPrePlay) {
 			game.players[socket.id].prePlay = index;
 			socket.emit("message", "PRE PLAY: " + ["⬅️", "⬆️", "⬇️", "➡️"][index]);
 		}
