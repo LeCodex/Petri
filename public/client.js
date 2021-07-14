@@ -169,8 +169,7 @@ function updateSetting(input, key) {
 	$settingsInput[key].update(input, key);
 }
 
-if (localStorage.settings === undefined) localStorage.settings = "{}";
-var settings = JSON.parse(localStorage.settings);
+var settings = localStorage.settings ? JSON.parse(localStorage.settings) : {};
 for (var [key, value] of Object.entries($settingsInput)) {
 	settings[key] = settings[key] ?? value.default;
 	updateSetting(value.input, key);
