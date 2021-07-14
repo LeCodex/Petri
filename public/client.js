@@ -136,6 +136,7 @@ $exitButton.addEventListener("click", function(evt) {
 });
 
 var settings = {};
+if (localStorage.settings === undefined) localStorage.settings = {};
 for (var [key, input] of Object.entries($settingsInput)) {
 	var name = key.slice(0, -6);
 	if (localStorage.settings[name] === undefined) localStorage.settings[name] = false;
