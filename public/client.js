@@ -135,20 +135,25 @@ $exitButton.addEventListener("click", function(evt) {
 	$settingsMenu.hide();
 });
 
+
+
 var settings = {};
-if (localStorage.settings === undefined) localStorage.settings = {};
-for (var [key, input] of Object.entries($settingsInput)) {
-	var name = key.slice(0, -6);
-	if (localStorage.settings[name] === undefined) localStorage.settings[name] = false;
-	settings[name] = localStorage.settings[name];
+function updateSetting(input, name) {
+	localStorage.settings = JSON.stringify(settings);
 	input.innerHTML = input.innerHMTL.split(":")[0] + ": " + (settings[name] ? "on" : "off");
+}
+
+if (localStorage.settings === undefined) localStorage.settings = "{}";
+for (var [key, value] of Object.entries($settingsInput)) {
+	var name = key.slice(0, -6);
+	settings[name] = localStorage.settings[name] ?? false;
+	updateSetting(value, name);
 
 	input.addEventListener("click", function(event) {
 		var input = event.target;
-		var name = input.id.slice(0, -6);
-		settings[name] = !settings[name];
-		localStorage.settings[name] = settings[name];
-		input.innerHTML = input.innerHMTL.split(":")[0] + ": " + (settings[name] ? "on" : "off");
+		var n = input.id.slice(0, -6);
+		settings[n] = !settings[n];
+		updateSetting(input, n);
 	});
 }
 
