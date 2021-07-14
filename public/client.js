@@ -237,7 +237,7 @@ function redrawMap() {
 	$map.animate({borderColor: goalColor}, 500).finished.then(() => { $map.style.borderColor = goalColor; });
 
 	var tileSize = Math.min((window.innerWidth * .4 - 12) / map[0].length, (window.innerHeight * .7 - 12) / map.length) - 1; // Use the amount of tiles on the dimensiosn used as the size of the "square"
-	console.log(tileSize);
+	// console.log(tileSize);
 
 	for (var [y, row] of map.entries()) {
 		var tr = document.createElement('tr');
@@ -265,6 +265,8 @@ function redrawMap() {
 }
 
 function updatePlayerList() {
+	if (turn !== -1) playerList.sort((a, b) => a.orderIndex === -1 ? 1 : a.orderIndex - b.orderIndex);
+	
 	$playerList[0].innerHTML = "";
 	for (var i = 0; i < playerList.length; i++) {
 		var player = playerList[i];
@@ -521,8 +523,7 @@ $(function() {
 		}
 
 		// Updating the player list. Doing it everytime since multiple values influence it
-		if (turn !== -1) playerList.sort((a, b) => a.orderIndex === -1 ? 1 : a.orderIndex - b.orderIndex);
-		updatePlayerList()
+		updatePlayerList();
 
 		// Updating the move list
 		if (info.moveList) {
