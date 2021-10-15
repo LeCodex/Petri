@@ -272,13 +272,15 @@ class Game {
 
 	endGame(index, reason) {
 		var stat = {
+			players: this.order.map(e => this.players[e].username),
 			powers: this.order.map(e => this.players[e].constructor.name),
 			scores: this.order.map(e => this.players[e].score),
 			victor: index,
 			reason: reason,
 			initial: this.initialMap,
 			moveList: this.moveList.map(e => e.join(" ")).join(" / "),
-			version: this.version
+			version: this.version,
+			date: Date.now()
 		};
 		console.log(stat);
 		this.data.stats.push(stat);
