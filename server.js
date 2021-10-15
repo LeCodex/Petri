@@ -27,7 +27,7 @@ const onWebhook = (req, res) => {
 	if (req.headers['x-github-event'] === 'push' && sig === req.headers['x-hub-signature']) {
 		cmd.run('chmod 777 ./git.sh');
 
-		cmd.get('./git.sh', (err, data) => {
+		cmd.run('./git.sh', (err, data) => {
 			if (data) {
 				console.log(data);
 			}
