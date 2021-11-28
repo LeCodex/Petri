@@ -189,7 +189,7 @@ class Game {
 	}
 
 	nextTurn(player, message) {
-		if (game.order[game.turn] !== player.id) return;
+		if (this.order[this.turn] !== player.id) return;
 
 		if (!this.checkWin()) {
 			if (this.timerType === 1) this.players[this.order[this.turn]].timer = this.settings.timer;
