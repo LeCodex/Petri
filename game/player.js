@@ -29,7 +29,7 @@ class Player {
 
 		this.move(dx, dy, symbol);
 
-		this.game.nextTurn();
+		this.game.nextTurn(this);
 	}
 
 	move(dx, dy, symbol) {
@@ -122,7 +122,7 @@ class Player {
 			var moveRow = this.game.moveList[this.game.moveList.length - 1];
 			moveRow[moveRow.length - 1] = "X";
 
-			this.game.nextTurn();
+			this.game.nextTurn(this);
 		} else {
 			this.game.io.in(this.game.id).emit("update gamestate", {map: this.game.map, layer: this.game.layer});
 			this.game.checkWin();
@@ -243,7 +243,7 @@ class Glitcher extends Player {
 			this.stealTurn = false;
 			this.game.io.in(this.game.id).emit("update gamestate", {map: this.game.map, layer: this.game.layer, moveList: this.game.moveList});
 		} else {
-			this.game.nextTurn();
+			this.game.nextTurn(this);
 		}
 	}
 }

@@ -244,7 +244,7 @@ class Game {
 
 			if (this.turn !== -1) {
 				var current = this.players[this.order[this.turn]];
-				if (current.prePlay !== null) setTimeout(() => { current.play(current.prePlay); current.prePlay = null; this.nextTurn() }, 100);
+				if (current.prePlay !== null) setTimeout(() => { current.play(current.prePlay); current.prePlay = null; this.nextTurn(current) }, 100);
 			}
 		}
 
