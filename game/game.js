@@ -296,6 +296,12 @@ class Game {
 		this.timer = null;
 
 		this.io.in(this.id).emit("message", "Victoire de " + this.players[this.order[index]].username + " par " + reason + "!");
+		this.io.in(this.id).emit("message", "Scores finaux:");
+		for (var id of this.order) {
+			player = this.players[id];
+			this.io.in(this.id).emit("message", player.emoji + " " + player.username + ": " + player.score);
+		}
+
 		this.io.in(this.id).emit("update gamestate", {turn: this.turn});
 
 		for (var id of this.order) {
