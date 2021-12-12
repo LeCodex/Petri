@@ -53,7 +53,7 @@ class Player {
 		var dx = [-1, 0, 0, 1][index];
 		var dy = [0, -1, 1, 0][index];
 		var variables = this.variables = JSON.parse(JSON.stringify(this.variables));
-		
+
 		var new_map = JSON.parse(JSON.stringify(this.game.map));
 		var new_layer = JSON.parse(JSON.stringify(this.game.layer));
 
@@ -384,7 +384,7 @@ class Isolated extends Player {
 		var right = this.getPowerSub(x, y, -dy, -dx);
 		// console.log(behind, left, right);
 
-		return Math.max(behind, Math.min(left, right));
+		return Math.max(behind, (left + right) / 2);
 	}
 
 	getPowerSub(x, y, dx, dy) {

@@ -242,7 +242,9 @@ class Game {
 
 					if (unique) this.endGame(index, "Usure");
 				}
-			} while ((!this.players[this.order[this.turn]].score || !this.players[this.order[this.turn]].checkForMoves().length) && this.turn !== -1);
+
+				if (this.turn === -1) break;
+			} while ((!this.players[this.order[this.turn]].score || !this.players[this.order[this.turn]].checkForMoves().length));
 
 			if (this.turn !== -1) {
 				var current = this.players[this.order[this.turn]];
