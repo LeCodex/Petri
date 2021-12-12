@@ -344,13 +344,13 @@ class Topologist extends Player {
 		this.description = "Considère les bords du terrain comme adjacents";
 	}
 
-	moveTiles(map, dx, dy) {
+	moveTiles(map, layer, dx, dy) {
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
 				var nx = (x + dx + this.game.settings.width) % this.game.settings.width;
 				var ny = (y + dy + this.game.settings.height) % this.game.settings.height;
 
-				this.moveTile(map, x, y, nx, ny, dx, dy);
+				this.moveTile(map, layer, x, y, nx, ny, dx, dy);
 			}
 		}
 	}
