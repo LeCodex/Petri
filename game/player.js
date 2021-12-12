@@ -22,31 +22,50 @@ class Player {
 		map[y][x] = this.index;
 	}
 
-	play(index) {
-		var dx = [-1, 0, 0, 1][index];
-		var dy = [0, -1, 1, 0][index];
-		var symbol = ["L", "U", "D", "R"][index];
+	checkForMoves() {
+		for (i = 0; i < 4; i++) {
+			if (this.move(index)) return true;
+		}
 
-		this.move(dx, dy, symbol);
-
-		this.game.nextTurn(this);
+		return false;
 	}
 
-	move(dx, dy, symbol) {
-		var moveRow = this.game.moveList[this.game.moveList.length - 1];
-		moveRow[moveRow.length - 1] += symbol;
+	play(index) {
+		var new_map = this.move(index);
+
+		if (new_map) {
+			var symbol = ["L", "U", "D", "R"][index];
+			var moveRow = this.game.moveList[this.game.moveList.length - 1];
+			moveRow[moveRow.length - 1] += symbol;
+
+			this.game.map = new_map;
+			this.game.nextTurn(this);
+		}
+	}
+
+	move(index) {
+		var dx = [-1, 0, 0, 1][index];
+		var dy = [0, -1, 1, 0][index];
 
 		var new_map = JSON.parse(JSON.stringify(this.game.map));
 
 		this.game.clearLayer();
 
+		this.moveTiles(new_map, dx, dy);
+
+		if (JSON.stringify(this.game.map) !== JSON.stringify(new_map)) {
+			return new_map;
+		} else {
+			return null;
+		}
+	}
+
+	moveTiles(map, dx, dy) {
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
-				this.moveTile(new_map, x, y, x + dx, y + dy, dx, dy);
+				this.moveTile(map, x, y, x + dx, y + dy, dx, dy);
 			}
 		}
-
-		this.game.map = new_map;
 	}
 
 	moveTile(map, x, y, nx, ny, dx, dy) {
@@ -317,24 +336,15 @@ class Topologist extends Player {
 		this.description = "Considère les bords du terrain comme adjacents";
 	}
 
-	move(dx, dy, symbol) {
-		var moveRow = this.game.moveList[this.game.moveList.length - 1];
-		moveRow[moveRow.length - 1] += symbol;
-
-		var new_map = JSON.parse(JSON.stringify(this.game.map));
-
-		this.game.clearLayer();
-
+	moveTiles(map, dx, dy) {
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
 				var nx = (x + dx + this.game.settings.width) % this.game.settings.width;
 				var ny = (y + dy + this.game.settings.height) % this.game.settings.height;
 
-				this.moveTile(new_map, x, y, nx, ny, dx, dy);
+				this.moveTile(map, x, y, nx, ny, dx, dy);
 			}
 		}
-
-		this.game.map = new_map;
 	}
 
 	getPower(x, y, dx, dy) {
@@ -361,13 +371,18 @@ class Isolated extends Player {
 	}
 
 	getPower(x, y, dx, dy) {
-		return Math.max(getPowerSub(x, y, dx, dy), Math.min(getPowerSub(x, y, dy, dx), getPowerSub(x, y, -dy, -dx)))
+		var behind = this.getPowerSub(x, y, dx, dy);
+		var left = this.getPowerSub(x, y, dy, dx);
+		var right = this.getPowerSub(x, y, -dy, -dx);
+		// console.log(behind, left, right);
+
+		return Math.max(behind, Math.min(left, right));
 	}
 
 	getPowerSub(x, y, dx, dy) {
 		var power = 0, tdx = 0, tdy = 0;
 
-		while ([-2, this.index].includes(this.game.map[y + tdy][x + tdx])) {
+		while (this.game.map[y + tdy][x + tdx] === this.index) {
 			power += 1;
 			tdx += dx;
 			tdy += dy;
