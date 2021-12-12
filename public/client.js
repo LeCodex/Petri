@@ -531,7 +531,7 @@ $(function() {
 		// Updating the move list
 		if (info.moveList) {
 			$moveList[0].innerHTML = "";
-			$moveList.append($("<li>").text("Manche " + round))
+			$moveList.append($("<li>").text("Manche " + round + "/30"))
 
 			for (var row of moveList) {
 				var element = $("<li>");
