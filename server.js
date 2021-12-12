@@ -187,9 +187,7 @@ io.on('connection', (socket) => {
 
 	socket.on('message', (message) => {
 		if (!game) return;
-
-		// Prevent inputs from having injected markup
-		message = $('<div/>').text(message).html()
+		
 		var msg = "[" + game.players[socket.id].username + "] " + message;
 
 		socket.emit("message", msg);

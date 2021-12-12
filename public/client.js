@@ -316,6 +316,8 @@ $(function() {
 				var message = $inputMessage.val();
 				if (message) {
 					$inputMessage.val('');
+					// Prevent inputs from having injected markup
+					message = $('<div/>').text(message).html()
 					socket.emit('message', message);
 				}
 			}
