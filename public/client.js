@@ -306,25 +306,21 @@ $(function() {
 		socket.emit("power selected", powers[index].key);
 	}
 
-	// Prevents input from having injected markup
-	const cleanInput = (input) => {
-		return $('<div/>').text(input).html();
-	}
-
 	 // Keyboard events
 	$window.keydown(event => {
 		var controls = ["ArrowLeft", "ArrowUp", "ArrowDown", "ArrowRight", "Space"];
 		var index = controls.indexOf(event.code);
 
-		if (index != -1) {
-			socket.emit("input", index, settings.prePlay);
-		} else if (event.which === 13) {
-			var message = $inputMessage.val();
-			message = cleanInput(message);
-			if (message) {
-				$inputMessage.val('');
-				socket.emit('message', message);
+		if ($inputMessage.is(":focus")) {
+			if (event.which === 13) {
+				var message = $inputMessage.val();
+				if (message) {
+					$inputMessage.val('');
+					socket.emit('message', message);
+				}
 			}
+		} else if (index != -1) {
+			socket.emit("input", index, settings.prePlay);
 		}
 	});
 

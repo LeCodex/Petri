@@ -188,6 +188,8 @@ io.on('connection', (socket) => {
 	socket.on('message', (message) => {
 		if (!game) return;
 
+		// Prevent inputs from having injected markup
+		message = $('<div/>').text(message).html()
 		var msg = "[" + game.players[socket.id].username + "] " + message;
 
 		socket.emit("message", msg);
@@ -328,7 +330,7 @@ io.on('connection', (socket) => {
 			}
 		} else if (index < 4 && game.players[socket.id].prePlay !== index && canPrePlay) {
 			game.players[socket.id].prePlay = index;
-			socket.emit("message", "PRE PLAY: " + ["⬅️", "⬆️", "⬇️", "➡️"][index]);
+			socket.emit("message", "PRE PLAY: " + ["⬅️", "⬆️", "⬇️", "➡️", "🦸‍♂️"][index]);
 		}
 	});
 
