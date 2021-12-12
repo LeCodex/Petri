@@ -224,24 +224,23 @@ class Game {
 				this.moveList[this.moveList.length - 1].push("");
 
 				this.players[this.order[this.turn]].onTurnStart();
-				if (!this.players[this.order[this.turn]].checkForMoves()) this.players[this.order[this.turn]].forfeit();
-			} while (!this.players[this.order[this.turn]].score);
 
-			if (this.round >= 30) {
-				var maxScore = 0, index = 0, unique = true;
+				if (this.round > 30) {
+					var maxScore = 0, index = 0, unique = true;
 
-				for (var [i, id] of this.order.entries()) {
-					if (this.players[id].score > maxScore) {
-						maxScore = this.players[id].score;
-						index = i;
-						unique = true;
-					} else if (this.players[id].score === maxScore) {
-						unique = false;
+					for (var [i, id] of this.order.entries()) {
+						if (this.players[id].score > maxScore) {
+							maxScore = this.players[id].score;
+							index = i;
+							unique = true;
+						} else if (this.players[id].score === maxScore) {
+							unique = false;
+						}
 					}
-				}
 
-				if (unique) this.endGame(index, "Usure");
-			}
+					if (unique) this.endGame(index, "Usure");
+				}
+			} while ((!this.players[this.order[this.turn]].score || !this.players[this.order[this.turn]].checkForMoves().length) && turn !== -1);
 
 			if (this.turn !== -1) {
 				var current = this.players[this.order[this.turn]];

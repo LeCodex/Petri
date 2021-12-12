@@ -23,11 +23,13 @@ class Player {
 	}
 
 	checkForMoves() {
+		var moves = [];
 		for (var i = 0; i < 4; i++) {
-			if (this.move(i)) return true;
+			var o = this.move(i)
+			if (o) moves.push({index: i, map: o.map);
 		}
 
-		return false;
+		return moves;
 	}
 
 	play(index) {
@@ -276,7 +278,7 @@ class Pacifist extends Player {
 
 		this.name = "Pacifiste";
 		this.emoji = "🕊️";
-		this.description = "Ne peut pas être attaqué par les joueurs qu'il n'a pas attaqué";
+		this.description = "Jusqu'au 21e tour, ne peut pas être attaqué par les joueurs qu'il n'a pas attaqué";
 
 		this.variables = {warWith: []};
 	}
@@ -287,7 +289,7 @@ class Pacifist extends Player {
 	}
 
 	onDefense(attack, defense, attacker) {
-		return (!this.variables.warWith.includes(attacker.id) ? -Infinity : 0);
+		return (!this.variables.warWith.includes(attacker.id) && this.game.round <= 20 ? -Infinity : 0);
 	}
 
 	onAttack(attack, defense, defender) {
