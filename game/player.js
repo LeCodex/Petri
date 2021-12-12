@@ -23,7 +23,7 @@ class Player {
 	}
 
 	checkForMoves() {
-		for (i = 0; i < 4; i++) {
+		for (var i = 0; i < 4; i++) {
 			if (this.move(index)) return true;
 		}
 
