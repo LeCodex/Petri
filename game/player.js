@@ -27,7 +27,7 @@ class Player {
 		var variables = JSON.parse(JSON.stringify(this.variables));
 		for (var i = 0; i < 4; i++) {
 			var o = this.move(i)
-			if (o) moves.push({index: i, map: o.map);
+			if (o) moves.push({index: i, map: o.map});
 			this.variables = JSON.parse(JSON.stringify(variables));
 		}
 
