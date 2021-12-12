@@ -31,15 +31,16 @@ class Player {
 	}
 
 	play(index) {
-		var new_map = this.move(index);
+		var ret = this.move(index);
 
-		if (new_map) {
+		if (ret) {
 			var symbol = ["L", "U", "D", "R"][index];
 			var moveRow = this.game.moveList[this.game.moveList.length - 1];
 			moveRow[moveRow.length - 1] += symbol;
 
-			this.game.map = new_map;
-			this.game.nextTurn(this);
+			this.game.map = ret.map;
+			this.game.layer = ret.layer;
+			if (this.postPlay()) this.game.nextTurn(this);
 		}
 	}
 
@@ -47,53 +48,57 @@ class Player {
 		var dx = [-1, 0, 0, 1][index];
 		var dy = [0, -1, 1, 0][index];
 
-		var new_map = JSON.parse(JSON.stringify(this.game.map));
-
 		this.game.clearLayer();
+		var new_map = JSON.parse(JSON.stringify(this.game.map));
+		var new_layer = JSON.parse(JSON.stringify(this.game.layer))
 
-		this.moveTiles(new_map, dx, dy);
+		this.moveTiles(new_map, new_layer, dx, dy);
 
 		if (JSON.stringify(this.game.map) !== JSON.stringify(new_map)) {
-			return new_map;
+			return {map: new_map, layer: new_layer};
 		} else {
 			return null;
 		}
 	}
 
-	moveTiles(map, dx, dy) {
+	moveTiles(map, layer, dx, dy) {
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
-				this.moveTile(map, x, y, x + dx, y + dy, dx, dy);
+				this.moveTile(map, layer, x, y, x + dx, y + dy, dx, dy);
 			}
 		}
 	}
 
-	moveTile(map, x, y, nx, ny, dx, dy) {
+	moveTile(map, layer, x, y, nx, ny, dx, dy) {
 		if (this.game.map[y][x] == this.index && this.game.inside(nx, ny)) {
 			var new_tile = this.game.map[ny][nx];
 
 			if (new_tile == -1) {
 				map[ny][nx] = this.index;
 			} else if (new_tile != this.index && new_tile >= 0) {
-				var owner = this.game.players[this.game.order[new_tile]];
-
-				var attack = this.getPower(x, y, -dx, -dy);
-				var defense = owner.getPower(nx, ny, dx, dy);
-
-				var diff = attack - defense;
-				diff += this.onAttack(attack, defense, owner);
-				diff += owner.onDefense(attack, defense, this);
-
-				if (diff > 0) {
-					map[ny][nx] = this.index;
-					this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fdagger_1f5e1-fe0f.png?v=1625421211688"; // 🗡️
-				} else if (diff == 0) {
-					map[ny][nx] = -1;
-					this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fcrossed-swords_2694-fe0f.png?v=1625421210008"; // ⚔️️
-				} else {
-					this.game.layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fshield_1f6e1-fe0f.png?v=1625421210487"; // 🛡️
-				}
+				this.fight(map, layer, x, y, nx, ny, dx, dy)
 			}
+		}
+	}
+
+	fight(map, layer, x, y, nx, ny, dx, dy) {
+		var owner = this.game.players[this.game.order[this.game.map[ny][nx]]];
+
+		var attack = this.getPower(x, y, -dx, -dy);
+		var defense = owner.getPower(nx, ny, dx, dy);
+
+		var diff = attack - defense;
+		diff += this.onAttack(attack, defense, owner);
+		diff += owner.onDefense(attack, defense, this);
+
+		if (diff > 0) {
+			map[ny][nx] = this.index;
+			layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fdagger_1f5e1-fe0f.png?v=1625421211688"; // 🗡️
+		} else if (diff == 0) {
+			map[ny][nx] = -1;
+			layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fcrossed-swords_2694-fe0f.png?v=1625421210008"; // ⚔️️
+		} else {
+			layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fshield_1f6e1-fe0f.png?v=1625421210487"; // 🛡️
 		}
 	}
 
@@ -119,6 +124,8 @@ class Player {
 	}
 
 	onTurnStart() {}
+
+	postPlay() {}
 
 	onTurnEnd() {}
 
@@ -251,18 +258,13 @@ class Glitcher extends Player {
 		return "️👾 Pouvoir du Glitcheur : Le prochain tour sera le vôtre";
 	}
 
-	play(index) {
-		var dx = [-1, 0, 0, 1][index];
-		var dy = [0, -1, 1, 0][index];
-		var symbol = ["L", "U", "D", "R"][index];
-
-		this.move(dx, dy, symbol);
-
+	postPlay() {
 		if (this.stealTurn) {
 			this.stealTurn = false;
 			this.game.io.in(this.game.id).emit("update gamestate", {map: this.game.map, layer: this.game.layer, moveList: this.game.moveList});
+			return false;
 		} else {
-			this.game.nextTurn(this);
+			return true;
 		}
 	}
 }
@@ -276,20 +278,20 @@ class Pacifist extends Player {
 		this.emoji = "🕊️";
 		this.description = "Ne peut pas être attaqué par les joueurs qu'il n'a pas attaqué";
 
-		this.variables = {peaceWith: []};
+		this.variables = {warWith: []};
 	}
 
 	spawn(map, x, y) {
 		map[y][x] = this.index;
-		this.variables.peaceWith = JSON.parse(JSON.stringify(this.game.order));
+		this.variables.warWith = [];
 	}
 
 	onDefense(attack, defense, attacker) {
-		return (this.variables.peaceWith.includes(attacker.id) && this.game.round <= 20 ? -Infinity : 0);
+		return (!this.variables.warWith.includes(attacker.id) ? -Infinity : 0);
 	}
 
 	onAttack(attack, defense, defender) {
-		if (this.variables.peaceWith.includes(defender.id)) this.variables.peaceWith.splice(this.variables.peaceWith.indexOf(defender.id), 1);
+		if (!this.variables.warWith.includes(defender.id)) this.variables.warWith.push(defender.id);
 		return 0;
 	}
 }
