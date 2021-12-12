@@ -375,7 +375,7 @@ class Isolated extends Player {
 
 		this.name = "Isolé";
 		this.emoji = "🏚️";
-		this.description = "En combat, prend le max entre les unités derrière et le min des unités de chaque côté";
+		this.description = "En combat, prend le max entre les unités derrière et la moyenne des unités de chaque côté";
 	}
 
 	getPower(x, y, dx, dy) {
