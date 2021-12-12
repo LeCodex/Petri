@@ -531,12 +531,14 @@ $(function() {
 		// Updating the move list
 		if (info.moveList) {
 			$moveList[0].innerHTML = "";
+			$moveList.append($("<li>").text("Manche " + round))
+
 			for (var row of moveList) {
 				var element = $("<li>");
 				for (var [i, move] of row.entries()) {
 					var str = $("<span>");
-					var playerIndex = playerList.filter(e => e.orderIndex === i)[0].index;
 
+					var playerIndex = playerList.filter(e => e.orderIndex === i)[0].index;
 					str[0].style.color = globals.PLAYER_COLORS[playerIndex];
 					str.text(move + " ");
 

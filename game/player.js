@@ -266,7 +266,7 @@ class Pacifist extends Player {
 	}
 
 	onDefense(attack, defense, attacker) {
-		return (this.variables.peaceWith.includes(attacker.id) ? -Infinity : 0);
+		return (this.variables.peaceWith.includes(attacker.id) && this.game.round <= 20 ? -Infinity : 0);
 	}
 
 	onAttack(attack, defense, defender) {
@@ -351,4 +351,31 @@ class Topologist extends Player {
 	}
 }
 
-module.exports = exports = {Player, Attacker, Defender, Architect, Swarm, Glitcher, Pacifist, General, Topologist};
+class Isolated extends Player {
+	constructor(game, user, id) {
+		super(game, user, id)
+
+		this.name = "Isolé";
+		this.emoji = "🏚️";
+		this.description = "En combat, prend le max entre les unités derrière et le min des unités de chaque côté";
+	}
+
+	getPower(x, y, dx, dy) {
+		return Math.max(getPowerSub(x, y, dx, dy), Math.min(getPowerSub(x, y, dy, dx), getPowerSub(x, y, -dy, -dx)))
+	}
+
+	getPowerSub(x, y, dx, dy) {
+		var power = 0, tdx = 0, tdy = 0;
+
+		while ([-2, this.index].includes(this.game.map[y + tdy][x + tdx])) {
+			power += 1;
+			tdx += dx;
+			tdy += dy;
+			if (!this.game.inside(x + tdx, y + tdy)) break;
+		}
+
+		return power;
+	}
+}
+
+module.exports = exports = {Player, Attacker, Defender, Architect, Swarm, Glitcher, Pacifist, General, Topologist, Isolated};

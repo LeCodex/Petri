@@ -226,7 +226,7 @@ class Game {
 				this.players[this.order[this.turn]].onTurnStart();
 			} while (!this.players[this.order[this.turn]].score);
 
-			if (this.round >= 40) {
+			if (this.round >= 30) {
 				var maxScore = 0, index = 0, unique = true;
 
 				for (var [i, id] of this.order.entries()) {
@@ -298,7 +298,7 @@ class Game {
 		this.io.in(this.id).emit("message", "Victoire de " + this.players[this.order[index]].username + " par " + reason + "!");
 		this.io.in(this.id).emit("message", "Scores finaux:");
 		for (var id of this.order) {
-			player = this.players[id];
+			var player = this.players[id];
 			this.io.in(this.id).emit("message", player.emoji + " " + player.username + ": " + player.score);
 		}
 

@@ -13,7 +13,7 @@
     "deepcopy": "^2.1.0",
     "moment": "^2.29.1",
     "node-cmd": "^5.0.0",
-    "body-parser": "^1.19.0"
+    "body-parser": "^1.19.1"
   },
   "engines": {
     "node": "12.x"
