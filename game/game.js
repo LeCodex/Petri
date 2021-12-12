@@ -224,6 +224,7 @@ class Game {
 				this.moveList[this.moveList.length - 1].push("");
 
 				this.players[this.order[this.turn]].onTurnStart();
+				if (!this.players[this.order[this.turn]].checkForMoves()) this.players[this.order[this.turn]].forfeit();
 			} while (!this.players[this.order[this.turn]].score);
 
 			if (this.round >= 30) {
@@ -244,7 +245,7 @@ class Game {
 
 			if (this.turn !== -1) {
 				var current = this.players[this.order[this.turn]];
-				if (current.prePlay !== null) setTimeout(() => { current.play(current.prePlay); current.prePlay = null; this.nextTurn(current) }, 100);
+				if (current.prePlay !== null) setTimeout(() => { current.play(current.prePlay); current.prePlay = null; }, 100);
 			}
 		}
 
