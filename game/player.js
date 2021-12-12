@@ -131,7 +131,7 @@ class Player {
 
 	onTurnStart() {}
 
-	postPlay() {}
+	postPlay() { return true; }
 
 	onTurnEnd() {}
 
