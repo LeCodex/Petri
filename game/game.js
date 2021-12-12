@@ -194,11 +194,13 @@ class Game {
 		if (!this.checkWin()) {
 			if (this.timerType === 1) this.players[this.order[this.turn]].timer = this.settings.timer;
 
-			var oldTurn = this.turn
+			var first = true
 			do {
-				if (this.turn != oldTurn) {
+				if (!first) {
 					var moveRow = this.moveList[this.moveList.length - 1];
 					moveRow[moveRow.length - 1] = "-";
+				} else {
+					first = false;
 				}
 
 				this.players[this.order[this.turn]].onTurnEnd();
@@ -240,7 +242,7 @@ class Game {
 
 					if (unique) this.endGame(index, "Usure");
 				}
-			} while ((!this.players[this.order[this.turn]].score || !this.players[this.order[this.turn]].checkForMoves().length) && turn !== -1);
+			} while ((!this.players[this.order[this.turn]].score || !this.players[this.order[this.turn]].checkForMoves().length) && this.turn !== -1);
 
 			if (this.turn !== -1) {
 				var current = this.players[this.order[this.turn]];

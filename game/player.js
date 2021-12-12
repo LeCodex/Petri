@@ -26,7 +26,7 @@ class Player {
 		var moves = [];
 		var variables = JSON.parse(JSON.stringify(this.variables));
 		for (var i = 0; i < 4; i++) {
-			var o = this.move(i)
+			var o = this.move(i);
 			if (o) moves.push({index: i, map: o.map});
 			this.variables = JSON.parse(JSON.stringify(variables));
 		}
@@ -35,6 +35,7 @@ class Player {
 	}
 
 	play(index) {
+		this.game.clearLayer();
 		var ret = this.move(index);
 
 		if (ret) {
@@ -52,10 +53,9 @@ class Player {
 		var dx = [-1, 0, 0, 1][index];
 		var dy = [0, -1, 1, 0][index];
 		var variables = this.variables = JSON.parse(JSON.stringify(this.variables));
-
-		this.game.clearLayer();
+		
 		var new_map = JSON.parse(JSON.stringify(this.game.map));
-		var new_layer = JSON.parse(JSON.stringify(this.game.layer))
+		var new_layer = JSON.parse(JSON.stringify(this.game.layer));
 
 		this.moveTiles(new_map, new_layer, dx, dy);
 
