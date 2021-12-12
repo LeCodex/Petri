@@ -24,9 +24,11 @@ class Player {
 
 	checkForMoves() {
 		var moves = [];
+		var variables = JSON.parse(JSON.stringify(this.variables));
 		for (var i = 0; i < 4; i++) {
 			var o = this.move(i)
 			if (o) moves.push({index: i, map: o.map);
+			this.variables = JSON.parse(JSON.stringify(variables));
 		}
 
 		return moves;
@@ -49,6 +51,7 @@ class Player {
 	move(index) {
 		var dx = [-1, 0, 0, 1][index];
 		var dy = [0, -1, 1, 0][index];
+		var variables = this.variables = JSON.parse(JSON.stringify(this.variables));
 
 		this.game.clearLayer();
 		var new_map = JSON.parse(JSON.stringify(this.game.map));
@@ -59,6 +62,7 @@ class Player {
 		if (JSON.stringify(this.game.map) !== JSON.stringify(new_map)) {
 			return {map: new_map, layer: new_layer};
 		} else {
+			this.variables = variables;
 			return null;
 		}
 	}
