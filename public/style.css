@@ -99,9 +99,9 @@ button {
 
 #eventList {
 	text-align: center;
-	left: 30%;
-	width: 40%;
-	top: 70%;
+	left: 70%;
+	width: 30%;
+  top: 0%;
 	bottom: 3%;
 	color: white;
 }
@@ -109,11 +109,22 @@ button {
 #inputMessage {
 	font-size: 100%;
 	top: 97%;
-	left: 30%;
-	width: 40%;
+	left: 70%;
+	width: 30%;
 	height: 3%;
 	outline: none;
 	position: absolute;
+}
+
+
+
+#moveList {
+	text-align: center;
+	left: 30%;
+	width: 40%;
+	top: 70%;
+  bottom: 0%;
+	color: white;
 }
 
 
@@ -161,16 +172,6 @@ button {
 
 #readyButton {
 	background-color: red;
-}
-
-
-
-#moveList {
-	text-align: center;
-	left: 70%;
-	width: 30%;
-	height: 100%;
-	color: white;
 }
 
 

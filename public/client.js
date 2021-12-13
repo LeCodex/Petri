@@ -531,8 +531,8 @@ $(function() {
 			$moveList[0].innerHTML = "";
 			$moveList.append($("<li>").text("Manche " + round + "/30"))
 
+			var element = $("<li>");
 			for (var row of moveList) {
-				var element = $("<li>");
 				for (var [i, move] of row.entries()) {
 					var str = $("<span>");
 
@@ -541,10 +541,10 @@ $(function() {
 					str.text(move + " ");
 
 					element.append(str);
+					if (playerIndex === playerList.length - 1 && move !== "") element.append($("<span>").text("/ "))
 				}
-
-				$moveList.append(element);
 			}
+			$moveList.append(element);
 		}
 
 		for (var input of Object.values($gameInputs)) input.disabled = (socket.id !== admin || turn !== -1);
