@@ -541,7 +541,7 @@ $(function() {
 					str.text(move + " ");
 
 					element.append(str);
-					if (playerIndex === playerList.length - 1 && move !== "") element.append($("<span>").text("/ "))
+					if (i === row.length - 1 && move !== "") element.append($("<span>").text("/ "))
 				}
 			}
 			$moveList.append(element);
