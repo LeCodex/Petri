@@ -58,7 +58,7 @@ class Game {
 			timer: x => x >= 10 && x <= 9999
 		};
 
-		this.version = "9.2";
+		this.version = "9.3";
 		this.initialMap = "";
 	}
 

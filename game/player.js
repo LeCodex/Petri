@@ -25,8 +25,9 @@ class Player {
 	checkForMoves() {
 		var moves = [];
 		var variables = JSON.parse(JSON.stringify(this.variables));
+    var ogMap = JSON.parse(JSON.stringify(this.game.map))
 		for (var i = 0; i < 4; i++) {
-			var o = this.move(i);
+			var o = this.move(ogMap, i);
 			if (o) moves.push({index: i, map: o.map});
 			this.variables = JSON.parse(JSON.stringify(variables));
 		}
@@ -36,7 +37,7 @@ class Player {
 
 	play(index) {
 		this.game.clearLayer();
-		var ret = this.move(index);
+		var ret = this.move(JSON.parse(JSON.stringify(this.game.map)), index);
 
 		if (ret) {
 			var symbol = ["L", "U", "D", "R"][index];
@@ -49,15 +50,15 @@ class Player {
 		}
 	}
 
-	move(index) {
+	move(map, index) {
 		var dx = [-1, 0, 0, 1][index];
 		var dy = [0, -1, 1, 0][index];
-		var variables = this.variables = JSON.parse(JSON.stringify(this.variables));
+		var variables = JSON.parse(JSON.stringify(this.variables));
 
-		var new_map = JSON.parse(JSON.stringify(this.game.map));
+		var new_map = JSON.parse(JSON.stringify(map));
 		var new_layer = JSON.parse(JSON.stringify(this.game.layer));
 
-		this.moveTiles(new_map, new_layer, dx, dy);
+		this.moveTiles(map, new_map, new_layer, dx, dy);
 
 		if (JSON.stringify(this.game.map) !== JSON.stringify(new_map)) {
 			return {map: new_map, layer: new_layer};
@@ -67,51 +68,51 @@ class Player {
 		}
 	}
 
-	moveTiles(map, layer, dx, dy) {
+	moveTiles(map, new_map, layer, dx, dy) {
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
-				this.moveTile(map, layer, x, y, x + dx, y + dy, dx, dy);
+				this.moveTile(map, new_map, layer, x, y, x + dx, y + dy, dx, dy);
 			}
 		}
 	}
 
-	moveTile(map, layer, x, y, nx, ny, dx, dy) {
-		if (this.game.map[y][x] == this.index && this.game.inside(nx, ny)) {
-			var new_tile = this.game.map[ny][nx];
+	moveTile(map, new_map, layer, x, y, nx, ny, dx, dy) {
+		if (map[y][x] == this.index && this.game.inside(nx, ny)) {
+			var new_tile = map[ny][nx];
 
 			if (new_tile == -1) {
-				map[ny][nx] = this.index;
+				new_map[ny][nx] = this.index;
 			} else if (new_tile != this.index && new_tile >= 0) {
-				this.fight(map, layer, x, y, nx, ny, dx, dy)
+				this.fight(map, new_map, layer, x, y, nx, ny, dx, dy)
 			}
 		}
 	}
 
-	fight(map, layer, x, y, nx, ny, dx, dy) {
-		var owner = this.game.players[this.game.order[this.game.map[ny][nx]]];
+	fight(map, new_map, layer, x, y, nx, ny, dx, dy) {
+		var owner = this.game.players[this.game.order[map[ny][nx]]];
 
-		var attack = this.getPower(x, y, -dx, -dy);
-		var defense = owner.getPower(nx, ny, dx, dy);
+		var attack = this.getPower(map, x, y, -dx, -dy);
+		var defense = owner.getPower(map, nx, ny, dx, dy);
 
 		var diff = attack - defense;
 		diff += this.onAttack(attack, defense, owner);
 		diff += owner.onDefense(attack, defense, this);
 
 		if (diff > 0) {
-			map[ny][nx] = this.index;
+			new_map[ny][nx] = this.index;
 			layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fdagger_1f5e1-fe0f.png?v=1625421211688"; // 🗡️
 		} else if (diff == 0) {
-			map[ny][nx] = -1;
+			new_map[ny][nx] = -1;
 			layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fcrossed-swords_2694-fe0f.png?v=1625421210008"; // ⚔️️
 		} else {
 			layer[ny][nx] = "https://cdn.glitch.com/e985941e-927e-489d-a79b-cffbabb57b92%2Fshield_1f6e1-fe0f.png?v=1625421210487"; // 🛡️
 		}
 	}
 
-	getPower(x, y, dx, dy) {
+	getPower(map, x, y, dx, dy) {
 		var power = 0, tdx = 0, tdy = 0;
 
-		while (this.game.map[y + tdy][x + tdx] === this.index) {
+		while (map[y + tdy][x + tdx] === this.index) {
 			power += 1;
 			tdx += dx;
 			tdy += dy;
@@ -202,10 +203,10 @@ class Architect extends Player {
 		this.description = "Les murs qu'il touche font partie de ses unités pour les combats";
 	}
 
-	getPower(x, y, dx, dy) {
+	getPower(map, x, y, dx, dy) {
 		var power = 0, tdx = 0, tdy = 0;
 
-		while ([-2, this.index].includes(this.game.map[y + tdy][x + tdx])) {
+		while ([-2, this.index].includes(map[y + tdy][x + tdx])) {
 			power += 1;
 			tdx += dx;
 			tdy += dy;
@@ -329,8 +330,8 @@ class General extends Player {
 		if (this.variables.turn == 3) this.variables.turn = 0;
 	}
 
-	getPower(x, y, dx, dy) {
-		return (this.variables.turn ? 2 : 1) * super.getPower(x, y, dx, dy);
+	getPower(map, x, y, dx, dy) {
+		return (this.variables.turn ? 2 : 1) * super.getPower(map, x, y, dx, dy);
 	}
 }
 
@@ -344,21 +345,21 @@ class Topologist extends Player {
 		this.description = "Considère les bords du terrain comme adjacents";
 	}
 
-	moveTiles(map, layer, dx, dy) {
+	moveTiles(map, new_map, layer, dx, dy) {
 		for (var [y, row] of this.game.map.entries()) {
 			for (var [x, tile] of row.entries()) {
 				var nx = (x + dx + this.game.settings.width) % this.game.settings.width;
 				var ny = (y + dy + this.game.settings.height) % this.game.settings.height;
 
-				this.moveTile(map, layer, x, y, nx, ny, dx, dy);
+				this.moveTile(map, new_map, layer, x, y, nx, ny, dx, dy);
 			}
 		}
 	}
 
-	getPower(x, y, dx, dy) {
+	getPower(map, x, y, dx, dy) {
 		var power = 0, tx = x, ty = y;
 
-		while (this.game.map[ty][tx] === this.index) {
+		while (map[ty][tx] === this.index) {
 			power += 1;
 			tx = (tx + dx + this.game.settings.width) % this.game.settings.width;
 			ty = (ty + dy + this.game.settings.height) % this.game.settings.height;
@@ -378,19 +379,19 @@ class Isolated extends Player {
 		this.description = "En combat, prend le max entre les unités derrière et la moyenne des unités de chaque côté";
 	}
 
-	getPower(x, y, dx, dy) {
-		var behind = this.getPowerSub(x, y, dx, dy);
-		var left = this.getPowerSub(x, y, dy, dx);
-		var right = this.getPowerSub(x, y, -dy, -dx);
+	getPower(map, x, y, dx, dy) {
+		var behind = this.getPowerSub(map, x, y, dx, dy);
+		var left = this.getPowerSub(map, x, y, dy, dx);
+		var right = this.getPowerSub(map, x, y, -dy, -dx);
 		// console.log(behind, left, right);
 
 		return Math.max(behind, (left + right) / 2);
 	}
 
-	getPowerSub(x, y, dx, dy) {
+	getPowerSub(map, x, y, dx, dy) {
 		var power = 0, tdx = 0, tdy = 0;
 
-		while (this.game.map[y + tdy][x + tdx] === this.index) {
+		while (map[y + tdy][x + tdx] === this.index) {
 			power += 1;
 			tdx += dx;
 			tdy += dy;
@@ -401,4 +402,51 @@ class Isolated extends Player {
 	}
 }
 
-module.exports = exports = {Player, Attacker, Defender, Architect, Swarm, Glitcher, Pacifist, General, Topologist, Isolated};
+class Liquid extends Player {
+	constructor(game, user, id) {
+		super(game, user, id)
+
+		this.name = "Liquide";
+		this.emoji = "💧";
+		this.description = "Se déplace dans la direction choisie avant de se répliquer. Ne perd pas d'unités s'il se déplace depuis un bord";
+	}
+
+	move(map, index) {
+		var dx = [-1, 0, 0, 1][index];
+		var dy = [0, -1, 1, 0][index];
+		var variables = JSON.parse(JSON.stringify(this.variables));
+
+		var new_map = JSON.parse(JSON.stringify(map));
+		var new_layer = JSON.parse(JSON.stringify(this.game.layer));
+
+		this.moveTiles(map, new_map, new_layer, dx, dy);
+    var map = JSON.parse(JSON.stringify(new_map));
+		this.destroyTiles(map, new_map, new_layer, dx, dy);
+    var map = JSON.parse(JSON.stringify(new_map));
+		this.moveTiles(map, new_map, new_layer, dx, dy);
+
+		if (JSON.stringify(this.game.map) !== JSON.stringify(new_map)) {
+			return {map: new_map, layer: new_layer};
+		} else {
+			this.variables = variables;
+			return null;
+		}
+	}
+
+  destroyTiles(map, new_map, layer, dx, dy) {
+    for (var [y, row] of map.entries()) {
+			for (var [x, tile] of row.entries()) {
+				if (map[y][x] === this.index) {
+          var nx = x - dx, ny = y - dy;
+          if (this.game.inside(nx, ny)) {
+            if (map[ny][nx] !== this.index) {
+              new_map[y][x] = -1;
+            }
+          }
+        }
+			}
+		}
+  }
+}
+
+module.exports = exports = {Player, Attacker, Defender, Architect, Swarm, Glitcher, Pacifist, General, Topologist, Isolated, Liquid};
